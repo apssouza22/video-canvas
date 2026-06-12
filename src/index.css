@@ -1,3 +1,19 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-vc-bg: #0f1115;
+  --color-vc-panel: #171a21;
+  --color-vc-border: #2a3140;
+  --color-vc-text: #f3f5f9;
+  --color-vc-muted: #9aa3b2;
+  --color-vc-accent: #3e8af5;
+  --color-vc-accent-hover: #5b9dff;
+  --color-vc-viewport-bg: #2a3140;
+  --color-vc-player-bg: #0a0c10;
+  --color-vc-handle: #ffffff;
+  --color-vc-selection: #3e8af5;
+}
+
 *,
 *::before,
 *::after {
@@ -12,7 +28,7 @@ body,
 }
 
 body {
-  background: #0f1115;
+  background: var(--color-vc-bg);
 }
 
 button,
@@ -20,4 +36,17 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+@layer components {
+  .transform-overlay__rotate-handle::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 1px;
+    height: 18px;
+    background: var(--color-vc-selection);
+    transform: translateX(-50%);
+  }
 }

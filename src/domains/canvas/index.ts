@@ -1,6 +1,6 @@
-export { VideoCanvas } from './components/VideoCanvas';
-export type { VideoCanvasProps } from './components/VideoCanvas';
-export { CanvasProvider, useCanvas } from './CanvasContext';
+export { mountVideoCanvas } from './components/VideoCanvas';
+export type { VideoCanvasOptions } from './components/VideoCanvas';
+export { CanvasStore } from './canvasStore';
 export { canvasReducer, initialCanvasState } from './canvasReducer';
 export { createCanvasElement } from './elementFactory';
 export {

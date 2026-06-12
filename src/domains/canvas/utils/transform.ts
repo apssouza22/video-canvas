@@ -1,5 +1,6 @@
-import type { CSSProperties } from 'react';
 import type { ElementTransform } from '../types';
+
+export type ElementStyle = Record<string, string | number>;
 
 export interface Point {
   x: number;
@@ -34,7 +35,7 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-export function elementTransformStyle(transform: ElementTransform): CSSProperties {
+export function elementTransformStyle(transform: ElementTransform): ElementStyle {
   return {
     left: transform.x,
     top: transform.y,
