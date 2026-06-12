@@ -55,14 +55,3 @@ export interface CanvasState {
   playerSize: CanvasSize;
   aspectRatio: AspectRatioId;
 }
-
-export type CanvasAction =
-  | { type: 'ADD_ELEMENT'; element: CanvasElement }
-  | { type: 'UPDATE_ELEMENT'; id: string; patch: Partial<CanvasElement> }
-  | { type: 'DELETE_ELEMENT'; id: string }
-  | { type: 'SELECT_ELEMENT'; id: string | null }
-  | { type: 'BRING_FORWARD'; id: string }
-  | { type: 'SEND_BACKWARD'; id: string }
-  | { type: 'SET_Z_INDEX'; id: string; zIndex: number }
-  | { type: 'SET_ELEMENTS'; elements: CanvasElement[] }
-  | { type: 'SET_ASPECT_RATIO'; aspectRatio: AspectRatioId };

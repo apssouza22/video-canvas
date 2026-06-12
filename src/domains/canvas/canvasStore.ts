@@ -1,11 +1,27 @@
-import { canvasReducer, initialCanvasState } from './canvasReducer';
 import type { AddMediaOptions, CompositionCanvasAPI } from './compositionCanvasApi';
+import { DEFAULT_ASPECT_RATIO, DEFAULT_PLAYER_SIZE } from './constants';
 import { createCanvasElement } from './elementFactory';
 import type { CanvasEventHandler, CanvasEventType } from './events';
 import { CanvasEventEmitter } from './events';
-import type { AspectRatioId, CanvasAction, CanvasElement, CanvasState } from './types';
+import type { AspectRatioId, CanvasElement, CanvasState } from './types';
+import { getPlayerSizeFromAspectRatio } from './utils/player';
 
 type Listener = () => void;
+
+export const initialCanvasState: CanvasState = {
+  elements: [],
+  selectedId: null,
+  playerSize: DEFAULT_PLAYER_SIZE,
+  aspectRatio: DEFAULT_ASPECT_RATIO,
+};
+
+function normalizeZIndex(elements: CanvasElement[]): CanvasElement[] {
+  return elements.map((element, index) => ({ ...element, zIndex: index }));
+}
+
+function sortByZIndex(elements: CanvasElement[]): CanvasElement[] {
+  return elements.slice().sort((a, b) => a.zIndex - b.zIndex);
+}
 
 export class CanvasStore implements CompositionCanvasAPI {
   private state: CanvasState;
@@ -65,30 +81,29 @@ export class CanvasStore implements CompositionCanvasAPI {
     this.events.off(event, handler);
   }
 
-  dispatch(action: CanvasAction): void {
+  addElement(element: CanvasElement): string {
     const previous = this.state;
-    const next = canvasReducer(previous, action);
-    if (next === previous) {
-      return;
+
+    this.state = {
+      ...this.state,
+      elements: normalizeZIndex(sortByZIndex([...this.state.elements, element])),
+      selectedId: element.id,
+    };
+
+    const added = this.getElement(element.id);
+    if (added) {
+      this.commit(previous, { element: added });
     }
 
-    this.state = next;
-    this.emitDiffEvents(previous, next, action);
-    this.notify();
-  }
-
-  addElement(element: CanvasElement): string {
-    this.dispatch({ type: 'ADD_ELEMENT', element });
     return element.id;
   }
 
   addMedia(options: AddMediaOptions): string {
-    const state = this.getState();
     const element = createCanvasElement({
       type: options.type,
       src: options.src,
-      zIndex: options.zIndex ?? state.elements.length,
-      playerSize: state.playerSize,
+      zIndex: options.zIndex ?? this.state.elements.length,
+      playerSize: this.state.playerSize,
     });
 
     if (options.name) {
@@ -103,7 +118,17 @@ export class CanvasStore implements CompositionCanvasAPI {
   }
 
   updateElement(id: string, patch: Partial<CanvasElement>): void {
-    this.dispatch({ type: 'UPDATE_ELEMENT', id, patch });
+    const previous = this.state;
+    const elements = this.state.elements.map((element) =>
+      element.id === id ? ({ ...element, ...patch } as CanvasElement) : element,
+    );
+
+    this.state = { ...this.state, elements };
+
+    const updated = this.getElement(id);
+    if (updated) {
+      this.commit(previous, { id, patch, element: updated });
+    }
   }
 
   removeElement(id: string): boolean {
@@ -112,7 +137,15 @@ export class CanvasStore implements CompositionCanvasAPI {
       return false;
     }
 
-    this.dispatch({ type: 'DELETE_ELEMENT', id });
+    const previous = this.state;
+
+    this.state = {
+      ...this.state,
+      elements: normalizeZIndex(this.state.elements.filter((item) => item.id !== id)),
+      selectedId: this.state.selectedId === id ? null : this.state.selectedId,
+    };
+
+    this.commit(previous, { removedId: id, removedElement: element });
     return true;
   }
 
@@ -121,71 +154,124 @@ export class CanvasStore implements CompositionCanvasAPI {
   }
 
   selectElement(id: string | null): void {
-    this.dispatch({ type: 'SELECT_ELEMENT', id });
+    const previous = this.state;
+    this.state = { ...this.state, selectedId: id };
+    this.commit(previous);
   }
 
   setAspectRatio(aspectRatio: AspectRatioId): void {
-    this.dispatch({ type: 'SET_ASPECT_RATIO', aspectRatio });
+    if (aspectRatio === this.state.aspectRatio) {
+      return;
+    }
+
+    const previous = this.state;
+
+    this.state = {
+      ...this.state,
+      aspectRatio,
+      playerSize: getPlayerSizeFromAspectRatio(aspectRatio),
+    };
+
+    this.commit(previous);
   }
 
   bringForward(id: string): void {
-    this.dispatch({ type: 'BRING_FORWARD', id });
+    const index = this.state.elements.findIndex((element) => element.id === id);
+    if (index === -1 || index === this.state.elements.length - 1) {
+      return;
+    }
+
+    const previous = this.state;
+    const elements = this.state.elements.slice();
+    const [item] = elements.splice(index, 1);
+    elements.splice(index + 1, 0, item);
+
+    this.state = { ...this.state, elements: normalizeZIndex(elements) };
+    this.commit(previous);
   }
 
   sendBackward(id: string): void {
-    this.dispatch({ type: 'SEND_BACKWARD', id });
+    const index = this.state.elements.findIndex((element) => element.id === id);
+    if (index <= 0) {
+      return;
+    }
+
+    const previous = this.state;
+    const elements = this.state.elements.slice();
+    const [item] = elements.splice(index, 1);
+    elements.splice(index - 1, 0, item);
+
+    this.state = { ...this.state, elements: normalizeZIndex(elements) };
+    this.commit(previous);
   }
 
   setZIndex(id: string, zIndex: number): void {
-    this.dispatch({ type: 'SET_Z_INDEX', id, zIndex });
+    const index = this.state.elements.findIndex((element) => element.id === id);
+    if (index === -1) {
+      return;
+    }
+
+    const previous = this.state;
+    const elements = this.state.elements.slice();
+    const [item] = elements.splice(index, 1);
+    const targetIndex = Math.max(0, Math.min(zIndex, elements.length));
+    elements.splice(targetIndex, 0, item);
+
+    this.state = { ...this.state, elements: normalizeZIndex(elements) };
+    this.commit(previous);
   }
 
-  private emitDiffEvents(previous: CanvasState, next: CanvasState, action: CanvasAction): void {
-    this.events.emit('state:changed', { state: next });
+  private commit(
+    previous: CanvasState,
+    change?: {
+      element?: CanvasElement;
+      id?: string;
+      patch?: Partial<CanvasElement>;
+      removedId?: string;
+      removedElement?: CanvasElement;
+    },
+  ): void {
+    this.events.emit('state:changed', { state: this.state });
 
-    if (action.type === 'ADD_ELEMENT') {
-      const element = next.elements.find((item) => item.id === action.element.id);
-      if (element) {
-        this.events.emit('element:added', { element });
-      }
+    if (change?.element && !change.id && !change.removedId) {
+      this.events.emit('element:added', { element: change.element });
     }
 
-    if (action.type === 'DELETE_ELEMENT') {
-      const element = previous.elements.find((item) => item.id === action.id);
-      if (element) {
-        this.events.emit('element:removed', { id: action.id, element });
-      }
+    if (change?.removedId && change.removedElement) {
+      this.events.emit('element:removed', {
+        id: change.removedId,
+        element: change.removedElement,
+      });
     }
 
-    if (action.type === 'UPDATE_ELEMENT') {
-      const element = next.elements.find((item) => item.id === action.id);
-      if (element) {
-        this.events.emit('element:updated', {
-          id: action.id,
-          patch: action.patch,
-          element,
-        });
-      }
+    if (change?.id && change.patch && change.element) {
+      this.events.emit('element:updated', {
+        id: change.id,
+        patch: change.patch,
+        element: change.element,
+      });
     }
 
-    if (previous.selectedId !== next.selectedId) {
+    if (previous.selectedId !== this.state.selectedId) {
       this.events.emit('selection:changed', {
-        selectedId: next.selectedId,
+        selectedId: this.state.selectedId,
         selectedElement:
-          next.elements.find((element) => element.id === next.selectedId) ?? null,
+          this.state.elements.find((element) => element.id === this.state.selectedId) ?? null,
       });
     }
 
     if (
-      previous.aspectRatio !== next.aspectRatio ||
-      previous.playerSize.width !== next.playerSize.width ||
-      previous.playerSize.height !== next.playerSize.height
+      previous.aspectRatio !== this.state.aspectRatio ||
+      previous.playerSize.width !== this.state.playerSize.width ||
+      previous.playerSize.height !== this.state.playerSize.height
     ) {
       this.events.emit('aspect-ratio:changed', {
-        aspectRatio: next.aspectRatio,
-        playerSize: next.playerSize,
+        aspectRatio: this.state.aspectRatio,
+        playerSize: this.state.playerSize,
       });
     }
+
+    this.notify();
   }
 
   private notify(): void {

@@ -6,7 +6,7 @@ export { ElementPropertiesPanel } from './components/ElementProperties';
 export { PlayerSettingsPanel } from './components/PlayerSettings';
 export { VideoCanvas, mountVideoCanvas } from './components/VideoCanvas';
 export type { VideoCanvasOptions } from './components/VideoCanvas';
-export { canvasReducer, initialCanvasState } from './canvasReducer';
+export { CanvasStore, initialCanvasState } from './canvasStore';
 export { createCanvasElement } from './elementFactory';
 export type {
   AddMediaOptions,
@@ -33,7 +33,6 @@ export {
 } from './utils/player';
 export type {
   AspectRatioId,
-  CanvasAction,
   CanvasElement,
   CanvasElementType,
   CanvasSize,
