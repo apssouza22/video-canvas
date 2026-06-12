@@ -46,10 +46,14 @@ export interface CanvasSize {
   height: number;
 }
 
+export type AspectRatioId = '16:9' | '9:16' | '1:1' | '4:5' | '4:3';
+
 export interface CanvasState {
   elements: CanvasElement[];
   selectedId: string | null;
-  canvasSize: CanvasSize;
+  /** Final render/export dimensions (the player frame). */
+  playerSize: CanvasSize;
+  aspectRatio: AspectRatioId;
 }
 
 export type CanvasAction =
@@ -59,4 +63,5 @@ export type CanvasAction =
   | { type: 'SELECT_ELEMENT'; id: string | null }
   | { type: 'BRING_FORWARD'; id: string }
   | { type: 'SEND_BACKWARD'; id: string }
-  | { type: 'SET_ELEMENTS'; elements: CanvasElement[] };
+  | { type: 'SET_ELEMENTS'; elements: CanvasElement[] }
+  | { type: 'SET_ASPECT_RATIO'; aspectRatio: AspectRatioId };

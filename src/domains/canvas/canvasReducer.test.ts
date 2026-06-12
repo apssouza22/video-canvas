@@ -57,4 +57,14 @@ describe('canvasReducer', () => {
 
     expect(next.elements.map((element) => element.id)).toEqual(['image-1', 'text-1']);
   });
+
+  it('updates player size when aspect ratio changes', () => {
+    const next = canvasReducer(initialCanvasState, {
+      type: 'SET_ASPECT_RATIO',
+      aspectRatio: '1:1',
+    });
+
+    expect(next.aspectRatio).toBe('1:1');
+    expect(next.playerSize).toEqual({ width: 1080, height: 1080 });
+  });
 });

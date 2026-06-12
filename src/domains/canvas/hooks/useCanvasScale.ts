@@ -1,47 +1,70 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import type { CanvasSize } from '../types';
+import { getFittedPlayerLayout, VIEWPORT_PADDING } from '../utils/player';
 
-interface CanvasScale {
+export interface ViewportLayout {
   scale: number;
-  containerWidth: number;
-  containerHeight: number;
+  displayWidth: number;
+  displayHeight: number;
+  mainWidth: number;
+  mainHeight: number;
 }
 
-export function useCanvasScale(canvasSize: CanvasSize): {
-  containerRef: RefObject<HTMLDivElement | null>;
-  scale: CanvasScale;
+export function useViewportLayout(
+  mainRef: RefObject<HTMLElement | null>,
+  playerSize: CanvasSize,
+): {
+  labelRef: RefObject<HTMLDivElement | null>;
+  layout: ViewportLayout;
 } {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [scale, setScale] = useState<CanvasScale>({
-    scale: 1,
-    containerWidth: canvasSize.width,
-    containerHeight: canvasSize.height,
+  const labelRef = useRef<HTMLDivElement | null>(null);
+  const [layout, setLayout] = useState<ViewportLayout>(() => {
+    const fitted = getFittedPlayerLayout(playerSize, playerSize);
+    return {
+      ...fitted,
+      mainWidth: playerSize.width,
+      mainHeight: playerSize.height,
+    };
   });
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
+    const main = mainRef.current;
+    if (!main) {
       return;
     }
 
-    const updateScale = () => {
-      const { width, height } = container.getBoundingClientRect();
-      const nextScale = Math.min(width / canvasSize.width, height / canvasSize.height);
-      setScale({
-        scale: nextScale,
-        containerWidth: width,
-        containerHeight: height,
+    const updateLayout = () => {
+      const { width, height } = main.getBoundingClientRect();
+      const labelHeight = labelRef.current?.offsetHeight ?? 0;
+      const stageGap = labelHeight > 0 ? 10 : 0;
+      const fitted = getFittedPlayerLayout(
+        { width, height },
+        playerSize,
+        labelHeight + stageGap,
+        VIEWPORT_PADDING,
+      );
+
+      setLayout({
+        ...fitted,
+        mainWidth: width,
+        mainHeight: height,
       });
     };
 
-    updateScale();
-    const observer = new ResizeObserver(updateScale);
-    observer.observe(container);
+    updateLayout();
+
+    const observer = new ResizeObserver(updateLayout);
+    observer.observe(main);
+
+    const label = labelRef.current;
+    if (label) {
+      observer.observe(label);
+    }
 
     return () => observer.disconnect();
-  }, [canvasSize.height, canvasSize.width]);
+  }, [mainRef, playerSize.height, playerSize.width]);
 
-  return { containerRef, scale };
+  return { labelRef, layout };
 }
 
 export function toCanvasPoint(

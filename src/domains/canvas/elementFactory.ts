@@ -1,19 +1,25 @@
-import { DEFAULT_CANVAS_SIZE, SAMPLE_IMAGE_SRC, SAMPLE_VIDEO_SRC } from './constants';
-import type { CanvasElement, CanvasElementType } from './types';
+import { DEFAULT_PLAYER_SIZE, SAMPLE_IMAGE_SRC, SAMPLE_VIDEO_SRC } from './constants';
+import type { CanvasElement, CanvasElementType, CanvasSize } from './types';
 import { createElementId } from './utils/id';
 
 interface CreateElementOptions {
   type: CanvasElementType;
   src?: string;
   zIndex: number;
+  playerSize?: CanvasSize;
 }
 
-export function createCanvasElement({ type, src, zIndex }: CreateElementOptions): CanvasElement {
+export function createCanvasElement({
+  type,
+  src,
+  zIndex,
+  playerSize = DEFAULT_PLAYER_SIZE,
+}: CreateElementOptions): CanvasElement {
   const base = {
     id: createElementId(),
     zIndex,
-    x: DEFAULT_CANVAS_SIZE.width / 2 - 200,
-    y: DEFAULT_CANVAS_SIZE.height / 2 - 120,
+    x: playerSize.width / 2 - 200,
+    y: playerSize.height / 2 - 120,
     width: 400,
     height: 240,
     rotation: 0,

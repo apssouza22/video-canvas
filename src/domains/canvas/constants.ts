@@ -1,9 +1,9 @@
-import type { CanvasSize } from './types';
+import type { AspectRatioId } from './types';
+import { getPlayerSizeFromAspectRatio } from './utils/player';
 
-export const DEFAULT_CANVAS_SIZE: CanvasSize = {
-  width: 1280,
-  height: 720,
-};
+export const DEFAULT_ASPECT_RATIO: AspectRatioId = '16:9';
+
+export const DEFAULT_PLAYER_SIZE = getPlayerSizeFromAspectRatio(DEFAULT_ASPECT_RATIO);
 
 export const SAMPLE_VIDEO_SRC =
   'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';

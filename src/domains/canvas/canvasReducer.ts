@@ -1,10 +1,12 @@
 import type { CanvasAction, CanvasElement, CanvasState } from './types';
-import { DEFAULT_CANVAS_SIZE } from './constants';
+import { DEFAULT_ASPECT_RATIO, DEFAULT_PLAYER_SIZE } from './constants';
+import { getPlayerSizeFromAspectRatio } from './utils/player';
 
 export const initialCanvasState: CanvasState = {
   elements: [],
   selectedId: null,
-  canvasSize: DEFAULT_CANVAS_SIZE,
+  playerSize: DEFAULT_PLAYER_SIZE,
+  aspectRatio: DEFAULT_ASPECT_RATIO,
 };
 
 function normalizeZIndex(elements: CanvasElement[]): CanvasElement[] {
@@ -75,6 +77,18 @@ export function canvasReducer(state: CanvasState, action: CanvasAction): CanvasS
 
     case 'SET_ELEMENTS':
       return { ...state, elements: normalizeZIndex(sortByZIndex(action.elements)) };
+
+    case 'SET_ASPECT_RATIO': {
+      if (action.aspectRatio === state.aspectRatio) {
+        return state;
+      }
+
+      return {
+        ...state,
+        aspectRatio: action.aspectRatio,
+        playerSize: getPlayerSizeFromAspectRatio(action.aspectRatio),
+      };
+    }
 
     default:
       return state;

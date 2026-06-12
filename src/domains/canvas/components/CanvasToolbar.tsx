@@ -14,6 +14,7 @@ export function CanvasToolbar() {
         type,
         src,
         zIndex: state.elements.length,
+        playerSize: state.playerSize,
       }),
     );
   };

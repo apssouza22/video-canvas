@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { canvasReducer, initialCanvasState } from './canvasReducer';
-import type { CanvasAction, CanvasElement, CanvasState } from './types';
+import type { AspectRatioId, CanvasAction, CanvasElement, CanvasState } from './types';
 
 interface CanvasContextValue {
   state: CanvasState;
@@ -17,6 +17,7 @@ interface CanvasContextValue {
   updateElement: (id: string, patch: Partial<CanvasElement>) => void;
   deleteElement: (id: string) => void;
   selectElement: (id: string | null) => void;
+  setAspectRatio: (aspectRatio: AspectRatioId) => void;
 }
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
@@ -54,6 +55,10 @@ export function CanvasProvider({ children, initialState }: CanvasProviderProps) 
     dispatch({ type: 'SELECT_ELEMENT', id });
   }, []);
 
+  const setAspectRatio = useCallback((aspectRatio: AspectRatioId) => {
+    dispatch({ type: 'SET_ASPECT_RATIO', aspectRatio });
+  }, []);
+
   const value = useMemo(
     () => ({
       state,
@@ -63,8 +68,17 @@ export function CanvasProvider({ children, initialState }: CanvasProviderProps) 
       updateElement,
       deleteElement,
       selectElement,
+      setAspectRatio,
     }),
-    [state, selectedElement, addElement, updateElement, deleteElement, selectElement],
+    [
+      state,
+      selectedElement,
+      addElement,
+      updateElement,
+      deleteElement,
+      selectElement,
+      setAspectRatio,
+    ],
   );
 
   return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;
