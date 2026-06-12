@@ -63,5 +63,6 @@ export type CanvasAction =
   | { type: 'SELECT_ELEMENT'; id: string | null }
   | { type: 'BRING_FORWARD'; id: string }
   | { type: 'SEND_BACKWARD'; id: string }
+  | { type: 'SET_Z_INDEX'; id: string; zIndex: number }
   | { type: 'SET_ELEMENTS'; elements: CanvasElement[] }
   | { type: 'SET_ASPECT_RATIO'; aspectRatio: AspectRatioId };

@@ -58,6 +58,19 @@ describe('canvasReducer', () => {
     expect(next.elements.map((element) => element.id)).toEqual(['image-1', 'text-1']);
   });
 
+  it('moves an element to an explicit z-index', () => {
+    const imageElement = { ...textElement, id: 'image-1', type: 'image' as const, src: '/a.png', objectFit: 'cover' as const };
+    const videoElement = { ...textElement, id: 'video-1', type: 'video' as const, src: '/a.mp4', muted: true, loop: true };
+    const first = canvasReducer(initialCanvasState, { type: 'ADD_ELEMENT', element: textElement });
+    const second = canvasReducer(first, { type: 'ADD_ELEMENT', element: imageElement });
+    const third = canvasReducer(second, { type: 'ADD_ELEMENT', element: videoElement });
+
+    const next = canvasReducer(third, { type: 'SET_Z_INDEX', id: 'text-1', zIndex: 2 });
+
+    expect(next.elements.at(-1)?.id).toBe('text-1');
+    expect(next.elements.map((element) => element.zIndex)).toEqual([0, 1, 2]);
+  });
+
   it('updates player size when aspect ratio changes', () => {
     const next = canvasReducer(initialCanvasState, {
       type: 'SET_ASPECT_RATIO',

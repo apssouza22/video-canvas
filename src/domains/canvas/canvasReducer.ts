@@ -75,6 +75,20 @@ export function canvasReducer(state: CanvasState, action: CanvasAction): CanvasS
       return { ...state, elements: normalizeZIndex(elements) };
     }
 
+    case 'SET_Z_INDEX': {
+      const index = state.elements.findIndex((element) => element.id === action.id);
+      if (index === -1) {
+        return state;
+      }
+
+      const elements = state.elements.slice();
+      const [item] = elements.splice(index, 1);
+      const targetIndex = Math.max(0, Math.min(action.zIndex, elements.length));
+      elements.splice(targetIndex, 0, item);
+
+      return { ...state, elements: normalizeZIndex(elements) };
+    }
+
     case 'SET_ELEMENTS':
       return { ...state, elements: normalizeZIndex(sortByZIndex(action.elements)) };
 
