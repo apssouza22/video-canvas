@@ -1,6 +1,7 @@
-import { UIComponent } from '../core/UIComponent';
-import type { AspectRatioId } from '../types';
-import { ASPECT_RATIO_PRESETS } from '../utils/player';
+import type { CompositionCanvasAPI } from '../src/domains/canvas/compositionCanvasApi';
+import type { AspectRatioId } from '../src/domains/canvas/types';
+import { ASPECT_RATIO_PRESETS } from '../src/domains/canvas/utils/player';
+import { UIComponent } from './core/UIComponent';
 
 const panelClass =
   'flex flex-col gap-3 p-3.5 border border-vc-border rounded-xl bg-white/[0.02]';
@@ -10,7 +11,7 @@ const presetActiveClass =
   'border-vc-accent bg-[#1a2740] shadow-[inset_0_0_0_1px_rgba(62,138,245,0.35)]';
 
 export class PlayerSettingsPanel extends UIComponent {
-  constructor(container: HTMLElement, api: ConstructorParameters<typeof UIComponent>[1]) {
+  constructor(container: HTMLElement, api: CompositionCanvasAPI) {
     super(container, api);
     this.bind();
   }
@@ -70,13 +71,4 @@ export class PlayerSettingsPanel extends UIComponent {
       }),
     );
   }
-}
-
-/** @deprecated Use the `PlayerSettingsPanel` class instead. */
-export function mountPlayerSettings(
-  container: HTMLElement,
-  api: ConstructorParameters<typeof PlayerSettingsPanel>[1],
-): () => void {
-  const panel = new PlayerSettingsPanel(container, api);
-  return () => panel.destroy();
 }

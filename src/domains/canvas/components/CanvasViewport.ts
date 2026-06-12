@@ -197,9 +197,3 @@ export class CanvasViewport implements Disposable {
     }
   }
 }
-
-/** @deprecated Use the `CanvasViewport` class instead. */
-export function mountCanvasViewport(container: HTMLElement, store: CanvasStore): () => void {
-  const viewport = new CanvasViewport(container, store);
-  return () => viewport.destroy();
-}

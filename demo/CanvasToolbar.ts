@@ -1,5 +1,6 @@
-import { UIComponent } from '../core/UIComponent';
-import type { CanvasElementType } from '../types';
+import type { CompositionCanvasAPI } from '../src/domains/canvas/compositionCanvasApi';
+import type { CanvasElementType } from '../src/domains/canvas/types';
+import { UIComponent } from './core/UIComponent';
 
 const panelClass =
   'flex flex-col gap-3 p-3.5 border border-vc-border rounded-xl bg-white/[0.02]';
@@ -17,7 +18,7 @@ function createButton(label: string): HTMLButtonElement {
 }
 
 export class CanvasToolbar extends UIComponent {
-  constructor(container: HTMLElement, api: ConstructorParameters<typeof UIComponent>[1]) {
+  constructor(container: HTMLElement, api: CompositionCanvasAPI) {
     super(container, api);
     this.bind();
   }
@@ -128,13 +129,4 @@ export class CanvasToolbar extends UIComponent {
     this.ref<HTMLButtonElement>('backward').disabled = !hasSelection;
     this.ref<HTMLButtonElement>('delete').disabled = !hasSelection;
   }
-}
-
-/** @deprecated Use the `CanvasToolbar` class instead. */
-export function mountCanvasToolbar(
-  container: HTMLElement,
-  api: ConstructorParameters<typeof CanvasToolbar>[1],
-): () => void {
-  const toolbar = new CanvasToolbar(container, api);
-  return () => toolbar.destroy();
 }

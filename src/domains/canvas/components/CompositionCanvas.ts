@@ -5,27 +5,31 @@ import type { Disposable } from '../core/Disposable';
 import type { AspectRatioId, CanvasElement, CanvasSize, CanvasState } from '../types';
 import { CanvasViewport } from './CanvasViewport';
 
+const ROOT_CLASSES = ['min-w-0', 'min-h-0', 'overflow-hidden', '[contain:layout_size]'];
+
 export interface CompositionCanvasOptions {
   initialState?: Partial<CanvasState>;
   className?: string;
 }
 
 export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
-  readonly element: HTMLDivElement;
+  readonly element: HTMLElement;
   private readonly store: CanvasStore;
   private viewport: CanvasViewport | null = null;
 
   constructor(container: HTMLElement, options: CompositionCanvasOptions = {}) {
-    this.store = new CanvasStore(options.initialState);
-    this.element = document.createElement('div');
-    this.element.className = [
-      'absolute inset-0 min-w-0 min-h-0 overflow-hidden [contain:layout_size]',
-      options.className,
-    ]
-      .filter(Boolean)
-      .join(' ');
+    this.element = container;
+    for (const className of ROOT_CLASSES) {
+      this.element.classList.add(className);
+    }
 
-    container.append(this.element);
+    if (options.className) {
+      for (const className of options.className.split(/\s+/).filter(Boolean)) {
+        this.element.classList.add(className);
+      }
+    }
+
+    this.store = new CanvasStore(options.initialState);
     this.viewport = new CanvasViewport(this.element, this.store);
   }
 
@@ -104,7 +108,6 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
   destroy(): void {
     this.viewport?.destroy();
     this.viewport = null;
-    this.element.remove();
   }
 }
 

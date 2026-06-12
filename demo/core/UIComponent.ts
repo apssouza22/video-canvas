@@ -1,5 +1,5 @@
-import type { CompositionCanvasAPI } from '../compositionCanvasApi';
-import type { Disposable } from './Disposable';
+import type { CompositionCanvasAPI } from '../../src/domains/canvas/compositionCanvasApi';
+import type { Disposable } from '../../src/domains/canvas/core/Disposable';
 
 export abstract class UIComponent implements Disposable {
   readonly element: HTMLElement;

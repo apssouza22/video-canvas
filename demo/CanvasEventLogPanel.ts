@@ -1,4 +1,4 @@
-import { UIComponent } from '../src/domains/canvas/core/UIComponent';
+import { UIComponent } from './core/UIComponent';
 
 export class CanvasEventLogPanel extends UIComponent {
   private entries: string[] = [];

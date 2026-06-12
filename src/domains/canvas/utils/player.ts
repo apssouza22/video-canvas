@@ -52,13 +52,3 @@ export function getFittedPlayerLayout(
     displayHeight: playerSize.height * scale,
   };
 }
-
-/** @deprecated Use getFittedPlayerLayout */
-export function getPlayerScale(
-  viewport: CanvasSize,
-  playerSize: CanvasSize,
-  padding = VIEWPORT_PADDING,
-  chromeHeight = 0,
-): number {
-  return getFittedPlayerLayout(viewport, playerSize, chromeHeight, padding).scale;
-}

@@ -1,7 +1,7 @@
-import { CanvasToolbar } from '../src/domains/canvas/components/CanvasToolbar';
 import { CompositionCanvas } from '../src/domains/canvas/components/CompositionCanvas';
-import { ElementPropertiesPanel } from '../src/domains/canvas/components/ElementProperties';
-import { PlayerSettingsPanel } from '../src/domains/canvas/components/PlayerSettings';
+import { CanvasToolbar } from './CanvasToolbar';
+import { ElementPropertiesPanel } from './ElementProperties';
+import { PlayerSettingsPanel } from './PlayerSettings';
 import type { Disposable } from '../src/domains/canvas/core/Disposable';
 import { createCanvasElement } from '../src/domains/canvas/elementFactory';
 import type { CanvasElement } from '../src/domains/canvas/types';
@@ -54,7 +54,7 @@ export class CompositionCanvasDemo implements Disposable {
     `;
 
     const main = document.createElement('main');
-    main.className = 'relative min-w-0 min-h-0 overflow-hidden [contain:layout_size]';
+    main.className = 'relative min-w-0 min-h-0';
 
     sidebar.append(header);
     this.root.append(sidebar, main);

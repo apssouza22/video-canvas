@@ -1,6 +1,6 @@
-import type { CompositionCanvasAPI } from '../compositionCanvasApi';
-import { UIComponent } from '../core/UIComponent';
-import type { CanvasElement } from '../types';
+import type { CompositionCanvasAPI } from '../src/domains/canvas/compositionCanvasApi';
+import type { CanvasElement } from '../src/domains/canvas/types';
+import { UIComponent } from './core/UIComponent';
 
 const panelClass =
   'flex flex-col gap-3 p-3.5 border border-vc-border rounded-xl bg-white/[0.02]';
@@ -237,13 +237,4 @@ export class ElementPropertiesPanel extends UIComponent {
     field.prepend(input);
     return field;
   }
-}
-
-/** @deprecated Use the `ElementPropertiesPanel` class instead. */
-export function mountElementProperties(
-  container: HTMLElement,
-  api: CompositionCanvasAPI,
-): () => void {
-  const panel = new ElementPropertiesPanel(container, api);
-  return () => panel.destroy();
 }

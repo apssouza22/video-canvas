@@ -149,10 +149,6 @@ export class CanvasStore implements CompositionCanvasAPI {
     return true;
   }
 
-  deleteElement(id: string): void {
-    this.removeElement(id);
-  }
-
   selectElement(id: string | null): void {
     const previous = this.state;
     this.state = { ...this.state, selectedId: id };

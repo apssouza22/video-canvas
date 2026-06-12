@@ -1,11 +1,6 @@
 export { CompositionCanvas, mountCompositionCanvas } from './components/CompositionCanvas';
 export type { CompositionCanvasOptions } from './components/CompositionCanvas';
 export { CanvasViewport } from './components/CanvasViewport';
-export { CanvasToolbar } from './components/CanvasToolbar';
-export { ElementPropertiesPanel } from './components/ElementProperties';
-export { PlayerSettingsPanel } from './components/PlayerSettings';
-export { VideoCanvas, mountVideoCanvas } from './components/VideoCanvas';
-export type { VideoCanvasOptions } from './components/VideoCanvas';
 export { CanvasStore, initialCanvasState } from './canvasStore';
 export { createCanvasElement } from './elementFactory';
 export type {
@@ -17,7 +12,6 @@ export type {
 } from './compositionCanvasApi';
 export { CanvasEventEmitter } from './events';
 export type { Disposable } from './core/Disposable';
-export { UIComponent } from './core/UIComponent';
 export {
   DEFAULT_ASPECT_RATIO,
   DEFAULT_PLAYER_SIZE,
@@ -27,7 +21,6 @@ export {
 export {
   ASPECT_RATIO_PRESETS,
   getFittedPlayerLayout,
-  getPlayerScale,
   getPlayerSizeFromAspectRatio,
   VIEWPORT_PADDING,
 } from './utils/player';
