@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@source '../demo';
+@source '.';
 
 @theme {
   --color-vc-bg: #0f1115;

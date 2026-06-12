@@ -1,10 +1,10 @@
-import { CanvasToolbar } from '../domains/canvas/components/CanvasToolbar';
-import { CompositionCanvas } from '../domains/canvas/components/CompositionCanvas';
-import { ElementPropertiesPanel } from '../domains/canvas/components/ElementProperties';
-import { PlayerSettingsPanel } from '../domains/canvas/components/PlayerSettings';
-import type { Disposable } from '../domains/canvas/core/Disposable';
-import { createCanvasElement } from '../domains/canvas/elementFactory';
-import type { CanvasElement } from '../domains/canvas/types';
+import { CanvasToolbar } from '../src/domains/canvas/components/CanvasToolbar';
+import { CompositionCanvas } from '../src/domains/canvas/components/CompositionCanvas';
+import { ElementPropertiesPanel } from '../src/domains/canvas/components/ElementProperties';
+import { PlayerSettingsPanel } from '../src/domains/canvas/components/PlayerSettings';
+import type { Disposable } from '../src/domains/canvas/core/Disposable';
+import { createCanvasElement } from '../src/domains/canvas/elementFactory';
+import type { CanvasElement } from '../src/domains/canvas/types';
 import { CanvasEventLogPanel } from './CanvasEventLogPanel';
 
 function createDemoElements(): CanvasElement[] {

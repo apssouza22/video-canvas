@@ -1,4 +1,4 @@
-import './index.css';
+import '../src/index.css';
 import { mountApp } from './app';
 
 const root = document.getElementById('root');
