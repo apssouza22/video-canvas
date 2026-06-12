@@ -1,4 +1,4 @@
-import type { CompositionCanvasAPI } from '../compositionCanvasApi';
+import { UIComponent } from '../core/UIComponent';
 import type { AspectRatioId } from '../types';
 import { ASPECT_RATIO_PRESETS } from '../utils/player';
 
@@ -9,28 +9,43 @@ const presetBaseClass =
 const presetActiveClass =
   'border-vc-accent bg-[#1a2740] shadow-[inset_0_0_0_1px_rgba(62,138,245,0.35)]';
 
-export function mountPlayerSettings(container: HTMLElement, api: CompositionCanvasAPI): () => void {
-  const section = document.createElement('section');
-  section.className = panelClass;
+export class PlayerSettingsPanel extends UIComponent {
+  constructor(container: HTMLElement, api: ConstructorParameters<typeof UIComponent>[1]) {
+    super(container, api);
+    this.bind();
+  }
 
-  const header = document.createElement('div');
-  header.innerHTML = `
-    <h2 class="m-0 text-base">Player / Export</h2>
-    <p class="mt-1.5 mb-0 text-vc-muted text-[0.8rem] leading-snug">The framed area is what will be included in the final render.</p>
-  `;
+  protected createElement(): HTMLElement {
+    const section = document.createElement('section');
+    section.className = panelClass;
 
-  const meta = document.createElement('div');
-  meta.className =
-    'flex justify-between gap-2 text-vc-accent text-xs font-semibold tracking-wide uppercase';
+    const header = document.createElement('div');
+    header.innerHTML = `
+      <h2 class="m-0 text-base">Player / Export</h2>
+      <p class="mt-1.5 mb-0 text-vc-muted text-[0.8rem] leading-snug">The framed area is what will be included in the final render.</p>
+    `;
 
-  const presets = document.createElement('div');
-  presets.className = 'grid gap-2';
+    const meta = this.tagRef(document.createElement('div'), 'meta');
+    meta.className =
+      'flex justify-between gap-2 text-vc-accent text-xs font-semibold tracking-wide uppercase';
 
-  section.append(header, meta, presets);
-  container.append(section);
+    const presets = this.tagRef(document.createElement('div'), 'presets');
+    presets.className = 'grid gap-2';
 
-  const render = () => {
-    const { playerSize, aspectRatio } = api.getState();
+    section.append(header, meta, presets);
+    return section;
+  }
+
+  protected bind(): void {
+    this.track(this.api.on('state:changed', () => this.render()));
+    this.render();
+  }
+
+  private render(): void {
+    const { playerSize, aspectRatio } = this.api.getState();
+    const meta = this.ref<HTMLDivElement>('meta');
+    const presets = this.ref<HTMLDivElement>('presets');
+
     meta.innerHTML = `
       <span>${playerSize.width} × ${playerSize.height}</span>
       <span>${aspectRatio}</span>
@@ -49,18 +64,19 @@ export function mountPlayerSettings(container: HTMLElement, api: CompositionCanv
           <span class="text-vc-muted text-xs">${preset.label}</span>
         `;
         button.addEventListener('click', () => {
-          api.setAspectRatio(preset.id as AspectRatioId);
+          this.api.setAspectRatio(preset.id as AspectRatioId);
         });
         return button;
       }),
     );
-  };
+  }
+}
 
-  const unsubscribe = api.on('state:changed', render);
-  render();
-
-  return () => {
-    unsubscribe();
-    section.remove();
-  };
+/** @deprecated Use the `PlayerSettingsPanel` class instead. */
+export function mountPlayerSettings(
+  container: HTMLElement,
+  api: ConstructorParameters<typeof PlayerSettingsPanel>[1],
+): () => void {
+  const panel = new PlayerSettingsPanel(container, api);
+  return () => panel.destroy();
 }

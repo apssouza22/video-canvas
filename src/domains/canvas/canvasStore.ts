@@ -1,12 +1,13 @@
 import { canvasReducer, initialCanvasState } from './canvasReducer';
-import type { AddMediaOptions } from './compositionCanvasApi';
+import type { AddMediaOptions, CompositionCanvasAPI } from './compositionCanvasApi';
 import { createCanvasElement } from './elementFactory';
+import type { CanvasEventHandler, CanvasEventType } from './events';
 import { CanvasEventEmitter } from './events';
 import type { AspectRatioId, CanvasAction, CanvasElement, CanvasState } from './types';
 
 type Listener = () => void;
 
-export class CanvasStore {
+export class CanvasStore implements CompositionCanvasAPI {
   private state: CanvasState;
   private readonly listeners = new Set<Listener>();
   readonly events = new CanvasEventEmitter();
@@ -27,9 +28,41 @@ export class CanvasStore {
     return this.state.elements.find((element) => element.id === this.state.selectedId) ?? null;
   }
 
+  getSelectedElement(): CanvasElement | null {
+    return this.selectedElement;
+  }
+
+  getSelectedId(): string | null {
+    return this.state.selectedId;
+  }
+
+  getAspectRatio(): AspectRatioId {
+    return this.state.aspectRatio;
+  }
+
+  getPlayerSize() {
+    return this.state.playerSize;
+  }
+
+  getElement(id: string): CanvasElement | undefined {
+    return this.state.elements.find((element) => element.id === id);
+  }
+
+  getElements(): CanvasElement[] {
+    return [...this.state.elements];
+  }
+
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
+  }
+
+  on<T extends CanvasEventType>(event: T, handler: CanvasEventHandler<T>): () => void {
+    return this.events.on(event, handler);
+  }
+
+  off<T extends CanvasEventType>(event: T, handler: CanvasEventHandler<T>): void {
+    this.events.off(event, handler);
   }
 
   dispatch(action: CanvasAction): void {
@@ -44,8 +77,9 @@ export class CanvasStore {
     this.notify();
   }
 
-  addElement(element: CanvasElement): void {
+  addElement(element: CanvasElement): string {
     this.dispatch({ type: 'ADD_ELEMENT', element });
+    return element.id;
   }
 
   addMedia(options: AddMediaOptions): string {
@@ -65,16 +99,25 @@ export class CanvasStore {
       Object.assign(element, options.transform);
     }
 
-    this.addElement(element);
-    return element.id;
+    return this.addElement(element);
   }
 
   updateElement(id: string, patch: Partial<CanvasElement>): void {
     this.dispatch({ type: 'UPDATE_ELEMENT', id, patch });
   }
 
-  deleteElement(id: string): void {
+  removeElement(id: string): boolean {
+    const element = this.getElement(id);
+    if (!element) {
+      return false;
+    }
+
     this.dispatch({ type: 'DELETE_ELEMENT', id });
+    return true;
+  }
+
+  deleteElement(id: string): void {
+    this.removeElement(id);
   }
 
   selectElement(id: string | null): void {

@@ -1,4 +1,5 @@
 import type { CanvasStore } from '../canvasStore';
+import type { Disposable } from '../core/Disposable';
 import type { CanvasElement } from '../types';
 import { createInitialLayout, observeViewportLayout, type ViewportLayout } from '../viewportLayout';
 import { createCanvasElementNode, updateCanvasElementNode } from './CanvasElement';
@@ -9,163 +10,196 @@ import {
   type TransformOverlayContext,
 } from './TransformOverlay';
 
-export function mountCanvasViewport(main: HTMLElement, store: CanvasStore): () => void {
-  const viewport = document.createElement('div');
-  viewport.className =
-    'absolute inset-0 flex items-center justify-center p-12 box-border bg-vc-viewport-bg overflow-hidden';
+export class CanvasViewport implements Disposable {
+  private readonly container: HTMLElement;
+  private readonly store: CanvasStore;
+  private readonly viewport: HTMLDivElement;
+  private readonly composition: HTMLDivElement;
+  private readonly player: HTMLDivElement;
+  private readonly label: HTMLDivElement;
 
-  const stage = document.createElement('div');
-  stage.className = 'flex flex-col items-center gap-2.5 max-w-full max-h-full';
+  private layout: ViewportLayout;
+  private readonly elementNodes = new Map<string, HTMLDivElement>();
+  private overlay: ReturnType<typeof createTransformOverlay> | null = null;
+  private overlayElementId: string | null = null;
+  private stopObserving = () => {};
+  private lastPlayerSize: { width: number; height: number };
+  private readonly unsubscribe: () => void;
+  private readonly unsubscribeSize: () => void;
 
-  const label = document.createElement('div');
-  label.className =
-    'shrink-0 px-2 py-0.5 rounded-md bg-[rgba(62,138,245,0.18)] text-[#d9e8ff] text-[0.7rem] font-semibold tracking-wide uppercase whitespace-nowrap pointer-events-none';
+  constructor(container: HTMLElement, store: CanvasStore) {
+    this.container = container;
+    this.store = store;
+    this.lastPlayerSize = store.getState().playerSize;
 
-  const player = document.createElement('div');
-  player.className = 'relative shrink-0';
+    this.viewport = document.createElement('div');
+    this.viewport.className =
+      'absolute inset-0 flex items-center justify-center p-12 box-border bg-vc-viewport-bg overflow-hidden';
 
-  const composition = document.createElement('div');
-  composition.className =
-    'absolute top-0 left-0 origin-top-left bg-vc-player-bg shadow-[0_16px_48px_rgba(0,0,0,0.35)] overflow-visible';
+    const stage = document.createElement('div');
+    stage.className = 'flex flex-col items-center gap-2.5 max-w-full max-h-full';
 
-  const frame = document.createElement('div');
-  frame.className =
-    'absolute inset-0 border-2 border-[rgba(62,138,245,0.95)] rounded-sm shadow-[0_0_0_1px_rgba(0,0,0,0.45),inset_0_0_0_1px_rgba(255,255,255,0.06)] pointer-events-none';
-  frame.setAttribute('aria-hidden', 'true');
+    this.label = document.createElement('div');
+    this.label.className =
+      'shrink-0 px-2 py-0.5 rounded-md bg-[rgba(62,138,245,0.18)] text-[#d9e8ff] text-[0.7rem] font-semibold tracking-wide uppercase whitespace-nowrap pointer-events-none';
 
-  player.append(composition, frame);
-  stage.append(label, player);
-  viewport.append(stage);
-  main.append(viewport);
+    this.player = document.createElement('div');
+    this.player.className = 'relative shrink-0';
 
-  viewport.addEventListener('pointerdown', () => store.selectElement(null));
+    this.composition = document.createElement('div');
+    this.composition.className =
+      'absolute top-0 left-0 origin-top-left bg-vc-player-bg shadow-[0_16px_48px_rgba(0,0,0,0.35)] overflow-visible';
 
-  let layout: ViewportLayout = createInitialLayout(store.getState().playerSize);
-  const elementNodes = new Map<string, HTMLDivElement>();
-  let overlay: ReturnType<typeof createTransformOverlay> | null = null;
-  let overlayElementId: string | null = null;
+    const frame = document.createElement('div');
+    frame.className =
+      'absolute inset-0 border-2 border-[rgba(62,138,245,0.95)] rounded-sm shadow-[0_0_0_1px_rgba(0,0,0,0.45),inset_0_0_0_1px_rgba(255,255,255,0.06)] pointer-events-none';
+    frame.setAttribute('aria-hidden', 'true');
 
-  const overlayContext: TransformOverlayContext = {
-    getCompositionRect: () => composition.getBoundingClientRect(),
-    getScale: () => layout.scale,
-    onTransform: (patch) => {
-      const selected = store.selectedElement;
-      if (selected) {
-        store.updateElement(selected.id, patch);
-      }
-    },
-  };
+    this.player.append(this.composition, frame);
+    stage.append(this.label, this.player);
+    this.viewport.append(stage);
+    this.container.append(this.viewport);
 
-  const applyLayout = () => {
-    const { playerSize } = store.getState();
+    this.layout = createInitialLayout(this.store.getState().playerSize);
+    this.unsubscribe = this.store.subscribe(() => {
+      this.syncElements();
+    });
+    this.unsubscribeSize = this.store.subscribe(() => {
+      this.checkPlayerSize();
+    });
+
+    this.bind();
+    this.startObserving();
+    this.applyLayout();
+    this.syncElements();
+  }
+
+  destroy(): void {
+    this.unsubscribe();
+    this.unsubscribeSize();
+    this.stopObserving();
+    if (this.overlay) {
+      destroyTransformOverlay(this.overlay);
+    }
+    this.viewport.remove();
+  }
+
+  private bind(): void {
+    this.viewport.addEventListener('pointerdown', () => this.store.selectElement(null));
+  }
+
+  private get overlayContext(): TransformOverlayContext {
+    return {
+      getCompositionRect: () => this.composition.getBoundingClientRect(),
+      getScale: () => this.layout.scale,
+      onTransform: (patch) => {
+        const selected = this.store.selectedElement;
+        if (selected) {
+          this.store.updateElement(selected.id, patch);
+        }
+      },
+    };
+  }
+
+  private applyLayout(): void {
+    const { playerSize } = this.store.getState();
     const aspectRatio = playerSize.width / playerSize.height;
 
-    player.style.width = `${layout.displayWidth}px`;
-    player.style.height = `${layout.displayHeight}px`;
-    player.style.aspectRatio = String(aspectRatio);
+    this.player.style.width = `${this.layout.displayWidth}px`;
+    this.player.style.height = `${this.layout.displayHeight}px`;
+    this.player.style.aspectRatio = String(aspectRatio);
 
-    composition.style.width = `${playerSize.width}px`;
-    composition.style.height = `${playerSize.height}px`;
-    composition.style.transform = `scale(${layout.scale})`;
+    this.composition.style.width = `${playerSize.width}px`;
+    this.composition.style.height = `${playerSize.height}px`;
+    this.composition.style.transform = `scale(${this.layout.scale})`;
 
-    label.textContent = `Export · ${playerSize.width} × ${playerSize.height}`;
-  };
+    this.label.textContent = `Export · ${playerSize.width} × ${playerSize.height}`;
+  }
 
-  const syncElements = () => {
-    const state = store.getState();
+  private syncElements(): void {
+    const state = this.store.getState();
     const sorted = [...state.elements].sort((a, b) => a.zIndex - b.zIndex);
     const nextIds = new Set(sorted.map((element) => element.id));
 
-    for (const [id, node] of elementNodes) {
+    for (const [id, node] of this.elementNodes) {
       if (!nextIds.has(id)) {
         node.remove();
-        elementNodes.delete(id);
+        this.elementNodes.delete(id);
       }
     }
 
     for (const element of sorted) {
-      const existing = elementNodes.get(element.id);
+      const existing = this.elementNodes.get(element.id);
       if (existing) {
         updateCanvasElementNode(existing, element);
       } else {
-        const node = createCanvasElementNode(element, (id) => store.selectElement(id));
-        elementNodes.set(element.id, node);
-        composition.append(node);
+        const node = createCanvasElementNode(element, (id) => this.store.selectElement(id));
+        this.elementNodes.set(element.id, node);
+        this.composition.append(node);
       }
     }
 
-    syncOverlay(state.selectedId ? sorted.find((e) => e.id === state.selectedId) ?? null : null);
-  };
+    this.syncOverlay(
+      state.selectedId ? sorted.find((element) => element.id === state.selectedId) ?? null : null,
+    );
+  }
 
-  const syncOverlay = (element: CanvasElement | null) => {
+  private syncOverlay(element: CanvasElement | null): void {
     if (!element) {
-      if (overlay) {
-        destroyTransformOverlay(overlay);
-        overlay = null;
-        overlayElementId = null;
+      if (this.overlay) {
+        destroyTransformOverlay(this.overlay);
+        this.overlay = null;
+        this.overlayElementId = null;
       }
       return;
     }
 
-    if (overlay && overlayElementId === element.id) {
-      updateTransformOverlay(overlay);
+    if (this.overlay && this.overlayElementId === element.id) {
+      updateTransformOverlay(this.overlay);
       return;
     }
 
-    if (overlay) {
-      destroyTransformOverlay(overlay);
+    if (this.overlay) {
+      destroyTransformOverlay(this.overlay);
     }
 
-    overlayElementId = element.id;
-    overlay = createTransformOverlay(() => store.selectedElement ?? element, overlayContext);
-    composition.append(overlay);
-  };
+    this.overlayElementId = element.id;
+    this.overlay = createTransformOverlay(
+      () => this.store.selectedElement ?? element,
+      this.overlayContext,
+    );
+    this.composition.append(this.overlay);
+  }
 
-  const unsubscribe = store.subscribe(() => {
-    syncElements();
-  });
-
-  let stopObserving = () => {};
-  const startObserving = () => {
-    stopObserving();
-    stopObserving = observeViewportLayout(
-      main,
-      label,
-      store.getState().playerSize,
+  private startObserving(): void {
+    this.stopObserving();
+    this.stopObserving = observeViewportLayout(
+      this.container,
+      this.label,
+      this.store.getState().playerSize,
       (nextLayout) => {
-        layout = nextLayout;
-        applyLayout();
+        this.layout = nextLayout;
+        this.applyLayout();
       },
     );
-  };
+  }
 
-  let lastPlayerSize = store.getState().playerSize;
-  const checkPlayerSize = () => {
-    const { playerSize } = store.getState();
+  private checkPlayerSize(): void {
+    const { playerSize } = this.store.getState();
     if (
-      playerSize.width !== lastPlayerSize.width ||
-      playerSize.height !== lastPlayerSize.height
+      playerSize.width !== this.lastPlayerSize.width ||
+      playerSize.height !== this.lastPlayerSize.height
     ) {
-      lastPlayerSize = playerSize;
-      layout = createInitialLayout(playerSize);
-      applyLayout();
-      startObserving();
+      this.lastPlayerSize = playerSize;
+      this.layout = createInitialLayout(playerSize);
+      this.applyLayout();
+      this.startObserving();
     }
-  };
+  }
+}
 
-  startObserving();
-  const unsubscribeSize = store.subscribe(checkPlayerSize);
-
-  applyLayout();
-  syncElements();
-
-  return () => {
-    unsubscribe();
-    unsubscribeSize();
-    stopObserving();
-    if (overlay) {
-      destroyTransformOverlay(overlay);
-    }
-    viewport.remove();
-  };
+/** @deprecated Use the `CanvasViewport` class instead. */
+export function mountCanvasViewport(container: HTMLElement, store: CanvasStore): () => void {
+  const viewport = new CanvasViewport(container, store);
+  return () => viewport.destroy();
 }

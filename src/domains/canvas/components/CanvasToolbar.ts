@@ -1,4 +1,4 @@
-import type { CompositionCanvasAPI } from '../compositionCanvasApi';
+import { UIComponent } from '../core/UIComponent';
 import type { CanvasElementType } from '../types';
 
 const panelClass =
@@ -16,105 +16,125 @@ function createButton(label: string): HTMLButtonElement {
   return button;
 }
 
-export function mountCanvasToolbar(container: HTMLElement, api: CompositionCanvasAPI): () => void {
-  const toolbar = document.createElement('div');
-  toolbar.className = panelClass;
+export class CanvasToolbar extends UIComponent {
+  constructor(container: HTMLElement, api: ConstructorParameters<typeof UIComponent>[1]) {
+    super(container, api);
+    this.bind();
+  }
 
-  const addGroup = document.createElement('div');
-  addGroup.className = groupClass;
-  const addLabel = document.createElement('span');
-  addLabel.className = labelClass;
-  addLabel.textContent = 'Add';
+  protected createElement(): HTMLElement {
+    const toolbar = document.createElement('div');
+    toolbar.className = panelClass;
 
-  const textBtn = createButton('Text');
-  const imageBtn = createButton('Image');
-  const videoBtn = createButton('Video');
-  const sampleVideoBtn = createButton('Sample Video');
+    const addGroup = document.createElement('div');
+    addGroup.className = groupClass;
+    const addLabel = document.createElement('span');
+    addLabel.className = labelClass;
+    addLabel.textContent = 'Add';
 
-  const layerGroup = document.createElement('div');
-  layerGroup.className = groupClass;
-  const layerLabel = document.createElement('span');
-  layerLabel.className = labelClass;
-  layerLabel.textContent = 'Layer';
+    const textBtn = createButton('Text');
+    const imageBtn = createButton('Image');
+    const videoBtn = createButton('Video');
+    const sampleVideoBtn = createButton('Sample Video');
 
-  const forwardBtn = createButton('Forward');
-  const backwardBtn = createButton('Backward');
-  const deleteBtn = createButton('Delete');
+    const layerGroup = document.createElement('div');
+    layerGroup.className = groupClass;
+    const layerLabel = document.createElement('span');
+    layerLabel.className = labelClass;
+    layerLabel.textContent = 'Layer';
 
-  const imageInput = document.createElement('input');
-  imageInput.type = 'file';
-  imageInput.accept = 'image/*';
-  imageInput.hidden = true;
+    const forwardBtn = this.tagRef(createButton('Forward'), 'forward');
+    const backwardBtn = this.tagRef(createButton('Backward'), 'backward');
+    const deleteBtn = this.tagRef(createButton('Delete'), 'delete');
 
-  const videoInput = document.createElement('input');
-  videoInput.type = 'file';
-  videoInput.accept = 'video/*';
-  videoInput.hidden = true;
+    const imageInput = this.tagRef(document.createElement('input'), 'image-input');
+    imageInput.type = 'file';
+    imageInput.accept = 'image/*';
+    imageInput.hidden = true;
 
-  addGroup.append(addLabel, textBtn, imageBtn, videoBtn, sampleVideoBtn);
-  layerGroup.append(layerLabel, forwardBtn, backwardBtn, deleteBtn);
-  toolbar.append(addGroup, layerGroup, imageInput, videoInput);
-  container.append(toolbar);
+    const videoInput = this.tagRef(document.createElement('input'), 'video-input');
+    videoInput.type = 'file';
+    videoInput.accept = 'video/*';
+    videoInput.hidden = true;
 
-  const addByType = (type: CanvasElementType, src?: string) => {
-    api.addMedia({ type, src });
-  };
+    addGroup.append(addLabel, textBtn, imageBtn, videoBtn, sampleVideoBtn);
+    layerGroup.append(layerLabel, forwardBtn, backwardBtn, deleteBtn);
+    toolbar.append(addGroup, layerGroup, imageInput, videoInput);
 
-  const handleFile = (type: 'image' | 'video', file: File | undefined) => {
+    textBtn.addEventListener('click', () => this.addByType('text'));
+    imageBtn.addEventListener('click', () => imageInput.click());
+    videoBtn.addEventListener('click', () => videoInput.click());
+    sampleVideoBtn.addEventListener('click', () => this.addByType('video'));
+
+    return toolbar;
+  }
+
+  protected bind(): void {
+    const imageInput = this.ref<HTMLInputElement>('image-input');
+    const videoInput = this.ref<HTMLInputElement>('video-input');
+    const forwardBtn = this.ref<HTMLButtonElement>('forward');
+    const backwardBtn = this.ref<HTMLButtonElement>('backward');
+    const deleteBtn = this.ref<HTMLButtonElement>('delete');
+
+    imageInput.addEventListener('change', () => {
+      this.handleFile('image', imageInput.files?.[0]);
+      imageInput.value = '';
+    });
+
+    videoInput.addEventListener('change', () => {
+      this.handleFile('video', videoInput.files?.[0]);
+      videoInput.value = '';
+    });
+
+    forwardBtn.addEventListener('click', () => {
+      const selected = this.api.getSelectedElement();
+      if (selected) {
+        this.api.bringForward(selected.id);
+      }
+    });
+
+    backwardBtn.addEventListener('click', () => {
+      const selected = this.api.getSelectedElement();
+      if (selected) {
+        this.api.sendBackward(selected.id);
+      }
+    });
+
+    deleteBtn.addEventListener('click', () => {
+      const selected = this.api.getSelectedElement();
+      if (selected) {
+        this.api.removeElement(selected.id);
+      }
+    });
+
+    this.track(this.api.on('state:changed', () => this.updateLayerButtons()));
+    this.updateLayerButtons();
+  }
+
+  private addByType(type: CanvasElementType, src?: string): void {
+    this.api.addMedia({ type, src });
+  }
+
+  private handleFile(type: 'image' | 'video', file: File | undefined): void {
     if (!file) {
       return;
     }
-    addByType(type, URL.createObjectURL(file));
-  };
+    this.addByType(type, URL.createObjectURL(file));
+  }
 
-  textBtn.addEventListener('click', () => addByType('text'));
-  imageBtn.addEventListener('click', () => imageInput.click());
-  videoBtn.addEventListener('click', () => videoInput.click());
-  sampleVideoBtn.addEventListener('click', () => addByType('video'));
+  private updateLayerButtons(): void {
+    const hasSelection = this.api.getSelectedElement() !== null;
+    this.ref<HTMLButtonElement>('forward').disabled = !hasSelection;
+    this.ref<HTMLButtonElement>('backward').disabled = !hasSelection;
+    this.ref<HTMLButtonElement>('delete').disabled = !hasSelection;
+  }
+}
 
-  imageInput.addEventListener('change', () => {
-    handleFile('image', imageInput.files?.[0]);
-    imageInput.value = '';
-  });
-
-  videoInput.addEventListener('change', () => {
-    handleFile('video', videoInput.files?.[0]);
-    videoInput.value = '';
-  });
-
-  forwardBtn.addEventListener('click', () => {
-    const selected = api.getSelectedElement();
-    if (selected) {
-      api.bringForward(selected.id);
-    }
-  });
-
-  backwardBtn.addEventListener('click', () => {
-    const selected = api.getSelectedElement();
-    if (selected) {
-      api.sendBackward(selected.id);
-    }
-  });
-
-  deleteBtn.addEventListener('click', () => {
-    const selected = api.getSelectedElement();
-    if (selected) {
-      api.removeElement(selected.id);
-    }
-  });
-
-  const updateLayerButtons = () => {
-    const hasSelection = api.getSelectedElement() !== null;
-    forwardBtn.disabled = !hasSelection;
-    backwardBtn.disabled = !hasSelection;
-    deleteBtn.disabled = !hasSelection;
-  };
-
-  const unsubscribe = api.on('state:changed', updateLayerButtons);
-  updateLayerButtons();
-
-  return () => {
-    unsubscribe();
-    toolbar.remove();
-  };
+/** @deprecated Use the `CanvasToolbar` class instead. */
+export function mountCanvasToolbar(
+  container: HTMLElement,
+  api: ConstructorParameters<typeof CanvasToolbar>[1],
+): () => void {
+  const toolbar = new CanvasToolbar(container, api);
+  return () => toolbar.destroy();
 }
