@@ -6,6 +6,7 @@ import type { Disposable } from '../src/domains/canvas/core/Disposable';
 import { createCanvasElement } from '../src/domains/canvas/elementFactory';
 import type { CanvasElement } from '../src/domains/canvas/types';
 import { CanvasEventLogPanel } from './CanvasEventLogPanel';
+import { PlaybackControls } from './PlaybackControls';
 
 function createDemoElements(): CanvasElement[] {
   const elements = [
@@ -17,13 +18,17 @@ function createDemoElements(): CanvasElement[] {
   elements[0].y = 120;
   elements[0].width = 520;
   elements[0].height = 300;
+  elements[0].startTime = 0;
+  elements[0].duration = 10;
 
   elements[1].x = 760;
   elements[1].y = 480;
   elements[1].width = 420;
   elements[1].height = 100;
+  elements[1].startTime = 4;
+  elements[1].duration = 6;
   if (elements[1].type === 'text') {
-    elements[1].content = 'Drag, resize, and rotate me';
+    elements[1].content = 'Appears at 4 seconds';
   }
 
   return elements;
@@ -61,7 +66,7 @@ export class CompositionCanvasDemo implements Disposable {
     this.container.append(this.root);
 
     this.canvas = new CompositionCanvas(main, {
-      initialState: { elements: demoElements, selectedId: demoElements[1].id },
+      initialState: { elements: demoElements, selectedId: null },
     });
 
     this.children.push(
@@ -69,6 +74,7 @@ export class CompositionCanvasDemo implements Disposable {
       new CanvasToolbar(sidebar, this.canvas),
       new ElementPropertiesPanel(sidebar, this.canvas),
       new CanvasEventLogPanel(sidebar, this.canvas),
+      new PlaybackControls(main, this.canvas),
     );
   }
 

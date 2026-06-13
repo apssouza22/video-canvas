@@ -1,10 +1,11 @@
-import type { AddMediaOptions, CompositionCanvasAPI } from './compositionCanvasApi';
+import type { AddMediaOptions } from './compositionCanvasApi';
 import { DEFAULT_ASPECT_RATIO, DEFAULT_PLAYER_SIZE } from './constants';
 import { createCanvasElement } from './elementFactory';
 import type { CanvasEventHandler, CanvasEventType } from './events';
 import { CanvasEventEmitter } from './events';
 import type { AspectRatioId, CanvasElement, CanvasState } from './types';
 import { getPlayerSizeFromAspectRatio } from './utils/player';
+import { getCompositionDuration } from './utils/timing';
 
 type Listener = () => void;
 
@@ -23,7 +24,7 @@ function sortByZIndex(elements: CanvasElement[]): CanvasElement[] {
   return elements.slice().sort((a, b) => a.zIndex - b.zIndex);
 }
 
-export class CanvasStore implements CompositionCanvasAPI {
+export class CanvasStore {
   private state: CanvasState;
   private readonly listeners = new Set<Listener>();
   readonly events = new CanvasEventEmitter();
@@ -58,6 +59,10 @@ export class CanvasStore implements CompositionCanvasAPI {
 
   getPlayerSize() {
     return this.state.playerSize;
+  }
+
+  getDuration(): number {
+    return getCompositionDuration(this.state.elements);
   }
 
   getElement(id: string): CanvasElement | undefined {

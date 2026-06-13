@@ -16,9 +16,14 @@ export interface AddMediaOptions {
   transform?: Partial<ElementTransform>;
 }
 
+export interface RenderOptions {
+  playing?: boolean;
+  /** Composition time when the current playback session started. */
+  playbackStartedAt?: number;
+}
+
 export interface CompositionCanvasAPI {
   addMedia(options: AddMediaOptions): string;
-  addElement(element: CanvasElement): string;
   removeElement(id: string): boolean;
   updateElement(id: string, patch: Partial<CanvasElement>): void;
   getElement(id: string): CanvasElement | undefined;
@@ -32,6 +37,8 @@ export interface CompositionCanvasAPI {
   setAspectRatio(aspectRatio: AspectRatioId): void;
   getAspectRatio(): AspectRatioId;
   getPlayerSize(): CanvasSize;
+  render(time: number, options?: RenderOptions): void;
+  getDuration(): number;
   getState(): CanvasState;
   on<T extends CanvasEventType>(event: T, handler: CanvasEventHandler<T>): () => void;
   off<T extends CanvasEventType>(event: T, handler: CanvasEventHandler<T>): void;

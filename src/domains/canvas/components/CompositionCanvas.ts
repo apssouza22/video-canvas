@@ -1,5 +1,5 @@
 import { CanvasStore } from '../canvasStore';
-import type { AddMediaOptions, CompositionCanvasAPI } from '../compositionCanvasApi';
+import type { AddMediaOptions, CompositionCanvasAPI, RenderOptions } from '../compositionCanvasApi';
 import type { CanvasEventHandler, CanvasEventType } from '../events';
 import type { Disposable } from '../core/Disposable';
 import type { AspectRatioId, CanvasElement, CanvasSize, CanvasState } from '../types';
@@ -31,14 +31,11 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
 
     this.store = new CanvasStore(options.initialState);
     this.viewport = new CanvasViewport(this.element, this.store);
+    this.render(0);
   }
 
   addMedia(options: AddMediaOptions): string {
     return this.store.addMedia(options);
-  }
-
-  addElement(element: CanvasElement): string {
-    return this.store.addElement(element);
   }
 
   removeElement(id: string): boolean {
@@ -91,6 +88,14 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
 
   getPlayerSize(): CanvasSize {
     return this.store.getPlayerSize();
+  }
+
+  render(time: number, options: RenderOptions = {}): void {
+    this.viewport?.render(time, options);
+  }
+
+  getDuration(): number {
+    return this.store.getDuration();
   }
 
   getState(): CanvasState {

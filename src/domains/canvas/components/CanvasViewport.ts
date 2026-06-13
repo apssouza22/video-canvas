@@ -1,8 +1,10 @@
+import type { RenderOptions } from '../compositionCanvasApi';
 import type { CanvasStore } from '../canvasStore';
 import type { Disposable } from '../core/Disposable';
 import type { CanvasElement } from '../types';
 import { createInitialLayout, observeViewportLayout, type ViewportLayout } from '../viewportLayout';
-import { createCanvasElementNode, updateCanvasElementNode } from './CanvasElement';
+import { isElementVisibleAtTime } from '../utils/timing';
+import { createCanvasElementNode, syncElementPlayback, updateCanvasElementNode } from './CanvasElement';
 import {
   createTransformOverlay,
   destroyTransformOverlay,
@@ -24,6 +26,8 @@ export class CanvasViewport implements Disposable {
   private overlayElementId: string | null = null;
   private stopObserving = () => {};
   private lastPlayerSize: { width: number; height: number };
+  private renderTime = 0;
+  private renderOptions: RenderOptions = {};
   private readonly unsubscribe: () => void;
   private readonly unsubscribeSize: () => void;
 
@@ -84,8 +88,19 @@ export class CanvasViewport implements Disposable {
     this.viewport.remove();
   }
 
+  render(time: number, options: RenderOptions = {}): void {
+    this.renderTime = time;
+    this.renderOptions = options;
+    this.syncPlayback();
+    this.syncSelectionOverlay();
+  }
+
   private bind(): void {
-    this.viewport.addEventListener('pointerdown', () => this.store.selectElement(null));
+    this.viewport.addEventListener('pointerdown', () => {
+      if (!this.renderOptions.playing) {
+        this.store.selectElement(null);
+      }
+    });
   }
 
   private get overlayContext(): TransformOverlayContext {
@@ -133,15 +148,43 @@ export class CanvasViewport implements Disposable {
       if (existing) {
         updateCanvasElementNode(existing, element);
       } else {
-        const node = createCanvasElementNode(element, (id) => this.store.selectElement(id));
+        const node = createCanvasElementNode(element, (id) => {
+          if (!this.renderOptions.playing) {
+            this.store.selectElement(id);
+          }
+        });
         this.elementNodes.set(element.id, node);
         this.composition.append(node);
       }
     }
 
-    this.syncOverlay(
-      state.selectedId ? sorted.find((element) => element.id === state.selectedId) ?? null : null,
-    );
+    this.syncPlayback();
+    this.syncSelectionOverlay();
+  }
+
+  private syncSelectionOverlay(): void {
+    const state = this.store.getState();
+    const selected =
+      !this.renderOptions.playing && state.selectedId
+        ? state.elements.find((element) => element.id === state.selectedId) ?? null
+        : null;
+
+    this.syncOverlay(selected);
+  }
+
+  private syncPlayback(): void {
+    const { elements } = this.store.getState();
+
+    for (const element of elements) {
+      const node = this.elementNodes.get(element.id);
+      if (!node) {
+        continue;
+      }
+
+      const visible = isElementVisibleAtTime(element, this.renderTime);
+      node.hidden = !visible;
+      syncElementPlayback(node, element, this.renderTime, this.renderOptions);
+    }
   }
 
   private syncOverlay(element: CanvasElement | null): void {

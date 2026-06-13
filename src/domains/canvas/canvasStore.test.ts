@@ -12,6 +12,8 @@ const textElement: TextCanvasElement = {
   width: 300,
   height: 80,
   rotation: 0,
+  startTime: 0,
+  duration: 5,
   content: 'Hello',
   fontSize: 32,
   fontFamily: 'Inter',
@@ -93,5 +95,13 @@ describe('CanvasStore', () => {
     const state = store.getState();
     expect(state.aspectRatio).toBe('1:1');
     expect(state.playerSize).toEqual({ width: 1080, height: 1080 });
+  });
+
+  it('computes composition duration from element timing', () => {
+    const store = new CanvasStore();
+    store.addElement(textElement);
+    store.addElement({ ...textElement, id: 'text-2', startTime: 8, duration: 3 });
+
+    expect(store.getDuration()).toBe(11);
   });
 });

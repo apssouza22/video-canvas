@@ -13,6 +13,10 @@ interface CanvasElementBase extends ElementTransform {
   type: CanvasElementType;
   zIndex: number;
   name: string;
+  /** When the element becomes visible, in seconds. */
+  startTime: number;
+  /** How long the element stays visible, in seconds. */
+  duration: number;
 }
 
 export interface VideoCanvasElement extends CanvasElementBase {

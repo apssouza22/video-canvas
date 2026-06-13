@@ -9,6 +9,7 @@ export type {
   CanvasEventHandler,
   CanvasEventMap,
   CanvasEventType,
+  RenderOptions,
 } from './compositionCanvasApi';
 export { CanvasEventEmitter } from './events';
 export type { Disposable } from './core/Disposable';
@@ -24,6 +25,15 @@ export {
   getPlayerSizeFromAspectRatio,
   VIEWPORT_PADDING,
 } from './utils/player';
+export {
+  DEFAULT_ELEMENT_DURATION,
+  getCompositionDuration,
+  getElementEndTime,
+  getElementLocalTime,
+  getVideoMediaTime,
+  getVisibleElements,
+  isElementVisibleAtTime,
+} from './utils/timing';
 export type {
   AspectRatioId,
   CanvasElement,

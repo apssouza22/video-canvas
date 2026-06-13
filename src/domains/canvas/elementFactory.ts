@@ -1,6 +1,7 @@
 import { DEFAULT_PLAYER_SIZE, SAMPLE_IMAGE_SRC, SAMPLE_VIDEO_SRC } from './constants';
 import type { CanvasElement, CanvasElementType, CanvasSize } from './types';
 import { createElementId } from './utils/id';
+import { DEFAULT_ELEMENT_DURATION } from './utils/timing';
 
 interface CreateElementOptions {
   type: CanvasElementType;
@@ -23,6 +24,8 @@ export function createCanvasElement({
     width: 400,
     height: 240,
     rotation: 0,
+    startTime: 0,
+    duration: DEFAULT_ELEMENT_DURATION,
   };
 
   if (type === 'video') {
@@ -33,6 +36,7 @@ export function createCanvasElement({
       src: src ?? SAMPLE_VIDEO_SRC,
       muted: true,
       loop: true,
+      duration: 10,
     };
   }
 

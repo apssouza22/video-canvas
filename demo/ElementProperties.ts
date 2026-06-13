@@ -229,7 +229,7 @@ export class ElementPropertiesPanel extends UIComponent {
     onChange: (checked: boolean) => void,
   ): HTMLLabelElement {
     const field = this.createLabel(label);
-    field.classList.add(checkboxClass);
+    field.className = `${labelClass} ${checkboxClass}`;
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.checked = checked;

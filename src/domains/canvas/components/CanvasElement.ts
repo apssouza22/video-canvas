@@ -1,4 +1,6 @@
+import type { RenderOptions } from '../compositionCanvasApi';
 import type { CanvasElement as CanvasElementType } from '../types';
+import { getVideoMediaTime } from '../utils/timing';
 import { elementTransformStyle } from '../utils/transform';
 
 const baseClass =
@@ -80,8 +82,8 @@ function createElementContent(element: CanvasElementType): HTMLElement {
     video.src = element.src;
     video.muted = element.muted;
     video.loop = element.loop;
-    video.autoplay = true;
     video.playsInline = true;
+    video.preload = 'auto';
     return video;
   }
 
@@ -106,4 +108,40 @@ function createElementContent(element: CanvasElementType): HTMLElement {
   text.style.textAlign = element.textAlign;
   text.style.backgroundColor = element.backgroundColor;
   return text;
+}
+
+export function syncElementPlayback(
+  node: HTMLDivElement,
+  element: CanvasElementType,
+  compositionTime: number,
+  options: RenderOptions = {},
+): void {
+  if (element.type !== 'video' || node.hidden) {
+    return;
+  }
+
+  const video = node.querySelector<HTMLVideoElement>('.canvas-element__media');
+  if (!video) {
+    return;
+  }
+
+  const isPlaying = options.playing ?? false;
+  const mediaTime = getVideoMediaTime(element, compositionTime, options);
+
+  if (Math.abs(video.currentTime - mediaTime) > 0.15) {
+    try {
+      video.currentTime = mediaTime;
+    } catch {
+      // Ignore seek errors while metadata is loading.
+    }
+  }
+
+  if (isPlaying) {
+    void video.play().catch(() => {
+      // Autoplay may be blocked until the user interacts with the page.
+    });
+    return;
+  }
+
+  video.pause();
 }
