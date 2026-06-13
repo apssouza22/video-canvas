@@ -101,6 +101,13 @@ export class PlaybackControls extends UIComponent {
       this.currentTime = 0;
     }
 
+    if (this.api.getActiveElementIds(this.currentTime).length === 0) {
+      const nextClip = this.api.getNextVisibilityBoundaryAfter(this.currentTime);
+      if (nextClip !== null && nextClip < duration) {
+        this.currentTime = nextClip;
+      }
+    }
+
     this.isPlaying = true;
     this.playbackStartedAt = this.currentTime;
     this.api.selectElement(null);
@@ -142,12 +149,20 @@ export class PlaybackControls extends UIComponent {
       if (this.lastFrameTimestamp !== null) {
         const deltaSeconds = (timestamp - this.lastFrameTimestamp) / 1000;
         const duration = this.api.getDuration();
-        const nextTime = this.currentTime + deltaSeconds;
+        let nextTime = this.currentTime + deltaSeconds;
 
         if (nextTime >= duration) {
           this.currentTime = duration;
           this.pause();
           return;
+        }
+
+        if (this.api.getActiveElementIds(nextTime).length === 0) {
+          const nextClip = this.api.getNextVisibilityBoundaryAfter(nextTime);
+          if (nextClip !== null && nextClip < duration) {
+            nextTime = nextClip;
+            this.playbackStartedAt = nextClip;
+          }
         }
 
         this.currentTime = nextTime;

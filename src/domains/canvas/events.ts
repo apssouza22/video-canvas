@@ -4,6 +4,7 @@ export interface CanvasEventMap {
   'element:added': { element: CanvasElement };
   'element:removed': { id: string; element: CanvasElement };
   'element:updated': { id: string; patch: Partial<CanvasElement>; element: CanvasElement };
+  'elements:reordered': { elements: CanvasElement[] };
   'selection:changed': { selectedId: string | null; selectedElement: CanvasElement | null };
   'aspect-ratio:changed': { aspectRatio: AspectRatioId; playerSize: CanvasSize };
   'state:changed': { state: CanvasState };
@@ -24,6 +25,7 @@ export class CanvasEventEmitter {
     'element:added': new Set(),
     'element:removed': new Set(),
     'element:updated': new Set(),
+    'elements:reordered': new Set(),
     'selection:changed': new Set(),
     'aspect-ratio:changed': new Set(),
     'state:changed': new Set(),

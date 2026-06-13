@@ -40,6 +40,8 @@ export {
   getVisibleElements,
   isElementVisibleAtTime,
 } from './utils/timing';
+export { VisibilityTimeline } from './utils/visibilityTimeline';
+export type { VisibilitySegment } from './utils/visibilityTimeline';
 export type {
   AspectRatioId,
   CanvasElement,

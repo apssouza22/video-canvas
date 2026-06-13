@@ -4,12 +4,18 @@ import { getVideoMediaTime } from '../utils/timing';
 import { elementTransformStyle } from '../utils/transform';
 
 const baseClass =
-  'absolute box-border cursor-move select-none touch-none';
+  'absolute box-border cursor-move select-none touch-none [contain:layout_style_paint]';
+
+export interface CanvasElementNodeRefs {
+  node: HTMLDivElement;
+  media?: HTMLVideoElement | HTMLAudioElement | HTMLImageElement;
+  text?: HTMLDivElement;
+}
 
 export function createCanvasElementNode(
   element: CanvasElementType,
   onSelect: (id: string) => void,
-): HTMLDivElement {
+): CanvasElementNodeRefs {
   const node = document.createElement('div');
   node.className = `${baseClass} canvas-element--${element.type}`;
   node.dataset.elementId = element.id;
@@ -25,27 +31,29 @@ export function createCanvasElementNode(
     });
   }
 
-  node.replaceChildren(createElementContent(element));
-  return node;
+  const content = createElementContent(element);
+  node.replaceChildren(content.node);
+  return { node, media: content.media, text: content.text };
 }
 
 export function updateCanvasElementNode(
-  node: HTMLDivElement,
+  refs: CanvasElementNodeRefs,
   element: CanvasElementType,
 ): void {
-  applyElementStyles(node, element);
+  applyElementStyles(refs.node, element);
 
-  const media = node.querySelector<HTMLVideoElement | HTMLImageElement | HTMLAudioElement>(
-    '.canvas-element__media',
-  );
-  const text = node.querySelector<HTMLDivElement>('.canvas-element__text');
+  const { media, text } = refs;
 
   if (element.type === 'video' && media instanceof HTMLVideoElement) {
     if (media.src !== element.src) {
       media.src = element.src;
     }
-    media.muted = element.muted;
-    media.loop = element.loop;
+    if (media.muted !== element.muted) {
+      media.muted = element.muted;
+    }
+    if (media.loop !== element.loop) {
+      media.loop = element.loop;
+    }
     return;
   }
 
@@ -53,8 +61,13 @@ export function updateCanvasElementNode(
     if (media.src !== element.src) {
       media.src = element.src;
     }
-    media.alt = element.name;
-    media.style.objectFit = element.objectFit;
+    if (media.alt !== element.name) {
+      media.alt = element.name;
+    }
+    const objectFit = element.objectFit;
+    if (media.style.objectFit !== objectFit) {
+      media.style.objectFit = objectFit;
+    }
     return;
   }
 
@@ -62,37 +75,83 @@ export function updateCanvasElementNode(
     if (media.src !== element.src) {
       media.src = element.src;
     }
-    media.loop = element.loop;
-    media.volume = element.volume;
+    if (media.loop !== element.loop) {
+      media.loop = element.loop;
+    }
+    if (media.volume !== element.volume) {
+      media.volume = element.volume;
+    }
     return;
   }
 
   if (element.type === 'text' && text) {
-    text.textContent = element.content;
-    text.style.fontSize = `${element.fontSize}px`;
-    text.style.fontFamily = element.fontFamily;
-    text.style.fontWeight = String(element.fontWeight);
-    text.style.color = element.color;
-    text.style.textAlign = element.textAlign;
-    text.style.backgroundColor = element.backgroundColor;
+    if (text.textContent !== element.content) {
+      text.textContent = element.content;
+    }
+    const fontSize = `${element.fontSize}px`;
+    if (text.style.fontSize !== fontSize) {
+      text.style.fontSize = fontSize;
+    }
+    if (text.style.fontFamily !== element.fontFamily) {
+      text.style.fontFamily = element.fontFamily;
+    }
+    const fontWeight = String(element.fontWeight);
+    if (text.style.fontWeight !== fontWeight) {
+      text.style.fontWeight = fontWeight;
+    }
+    if (text.style.color !== element.color) {
+      text.style.color = element.color;
+    }
+    if (text.style.textAlign !== element.textAlign) {
+      text.style.textAlign = element.textAlign;
+    }
+    if (text.style.backgroundColor !== element.backgroundColor) {
+      text.style.backgroundColor = element.backgroundColor;
+    }
   }
 }
 
 function applyElementStyles(node: HTMLDivElement, element: CanvasElementType): void {
   const style = elementTransformStyle(element);
-  Object.assign(node.style, {
-    left: `${style.left}px`,
-    top: `${style.top}px`,
-    width: `${style.width}px`,
-    height: `${style.height}px`,
-    transform: style.transform,
-    transformOrigin: style.transformOrigin,
-    zIndex: String(element.zIndex),
-    opacity: String(element.opacity),
-  });
+  const nodeStyle = node.style;
+  const left = `${style.left}px`;
+  const top = `${style.top}px`;
+  const width = `${style.width}px`;
+  const height = `${style.height}px`;
+  const zIndex = String(element.zIndex);
+  const opacity = String(element.opacity);
+
+  if (nodeStyle.left !== left) {
+    nodeStyle.left = left;
+  }
+  if (nodeStyle.top !== top) {
+    nodeStyle.top = top;
+  }
+  if (nodeStyle.width !== width) {
+    nodeStyle.width = width;
+  }
+  if (nodeStyle.height !== height) {
+    nodeStyle.height = height;
+  }
+  if (nodeStyle.transform !== style.transform) {
+    nodeStyle.transform = String(style.transform);
+  }
+  if (nodeStyle.transformOrigin !== style.transformOrigin) {
+    nodeStyle.transformOrigin = String(style.transformOrigin);
+  }
+  if (nodeStyle.zIndex !== zIndex) {
+    nodeStyle.zIndex = zIndex;
+  }
+  if (nodeStyle.opacity !== opacity) {
+    nodeStyle.opacity = opacity;
+  }
 }
 
-function createElementContent(element: CanvasElementType): HTMLElement {
+function createElementContent(element: CanvasElementType): {
+  node: HTMLElement;
+  media?: HTMLVideoElement | HTMLAudioElement | HTMLImageElement;
+  text?: HTMLDivElement;
+} {
   if (element.type === 'video') {
     const video = document.createElement('video');
     video.className = 'block w-full h-full pointer-events-none canvas-element__media';
@@ -101,7 +160,7 @@ function createElementContent(element: CanvasElementType): HTMLElement {
     video.loop = element.loop;
     video.playsInline = true;
     video.preload = 'auto';
-    return video;
+    return { node: video, media: video };
   }
 
   if (element.type === 'image') {
@@ -111,7 +170,9 @@ function createElementContent(element: CanvasElementType): HTMLElement {
     image.alt = element.name;
     image.draggable = false;
     image.style.objectFit = element.objectFit;
-    return image;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    return { node: image, media: image };
   }
 
   if (element.type === 'audio') {
@@ -121,7 +182,7 @@ function createElementContent(element: CanvasElementType): HTMLElement {
     audio.loop = element.loop;
     audio.volume = element.volume;
     audio.preload = 'auto';
-    return audio;
+    return { node: audio, media: audio };
   }
 
   const text = document.createElement('div');
@@ -134,28 +195,31 @@ function createElementContent(element: CanvasElementType): HTMLElement {
   text.style.color = element.color;
   text.style.textAlign = element.textAlign;
   text.style.backgroundColor = element.backgroundColor;
-  return text;
+  return { node: text, text };
 }
 
 export function syncElementPlayback(
-  node: HTMLDivElement,
+  refs: CanvasElementNodeRefs,
   element: CanvasElementType,
   compositionTime: number,
   options: RenderOptions = {},
 ): void {
-  if ((element.type !== 'video' && element.type !== 'audio') || node.hidden) {
+  if (element.type !== 'video' && element.type !== 'audio') {
     return;
   }
 
-  const media = node.querySelector<HTMLVideoElement | HTMLAudioElement>('.canvas-element__media');
-  if (!media) {
+  const { node, media } = refs;
+  if (node.hidden || !(media instanceof HTMLVideoElement || media instanceof HTMLAudioElement)) {
     return;
   }
 
   const isPlaying = options.playing ?? false;
   const mediaTime = getVideoMediaTime(element, compositionTime, options);
+  const isVideo = media instanceof HTMLVideoElement;
 
-  if (Math.abs(media.currentTime - mediaTime) > 0.15) {
+  // Scrubbing and audio need direct seeks; playing video is corrected via RVFC.
+  const shouldSeek = !isPlaying || !isVideo;
+  if (shouldSeek && Math.abs(media.currentTime - mediaTime) > 0.15) {
     try {
       media.currentTime = mediaTime;
     } catch {
@@ -164,11 +228,17 @@ export function syncElementPlayback(
   }
 
   if (isPlaying) {
-    void media.play().catch(() => {
-      // Autoplay may be blocked until the user interacts with the page.
-    });
+    if (node.dataset.mediaPlaying !== 'true') {
+      node.dataset.mediaPlaying = 'true';
+      void media.play().catch(() => {
+        // Autoplay may be blocked until the user interacts with the page.
+      });
+    }
     return;
   }
 
-  media.pause();
+  if (node.dataset.mediaPlaying === 'true') {
+    node.dataset.mediaPlaying = 'false';
+    media.pause();
+  }
 }

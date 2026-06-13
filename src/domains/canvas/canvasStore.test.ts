@@ -117,4 +117,14 @@ describe('CanvasStore', () => {
     expect(image?.startTime).toBe(2);
     expect(store.getDuration()).toBe(7);
   });
+
+  it('exposes active elements and the next visibility boundary', () => {
+    const store = new CanvasStore();
+    store.addElement({ ...textElement, startTime: 0, duration: 4 });
+    store.addElement({ ...textElement, id: 'text-2', startTime: 8, duration: 2 });
+
+    expect(store.getActiveElementIds(3)).toEqual(['text-1']);
+    expect(store.getActiveElementIds(7)).toEqual([]);
+    expect(store.getNextVisibilityBoundaryAfter(5)).toBe(8);
+  });
 });

@@ -106,6 +106,14 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
     return this.store.getDuration();
   }
 
+  getActiveElementIds(time = this.currentTime): string[] {
+    return this.store.getActiveElementIds(time);
+  }
+
+  getNextVisibilityBoundaryAfter(time = this.currentTime): number | null {
+    return this.store.getNextVisibilityBoundaryAfter(time);
+  }
+
   getState(): CanvasState {
     return this.store.getState();
   }

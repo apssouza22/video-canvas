@@ -5,6 +5,7 @@ import { CanvasEventEmitter } from './events';
 import type { AspectRatioId, CanvasElement, CanvasState } from './types';
 import { getPlayerSizeFromAspectRatio } from './utils/player';
 import { getCompositionDuration } from './utils/timing';
+import { VisibilityTimeline } from './utils/visibilityTimeline';
 
 type Listener = () => void;
 
@@ -26,6 +27,7 @@ function sortByZIndex(elements: CanvasElement[]): CanvasElement[] {
 export class CanvasStore {
   private state: CanvasState;
   private readonly listeners = new Set<Listener>();
+  private readonly visibilityTimeline = new VisibilityTimeline();
   readonly events = new CanvasEventEmitter();
 
   constructor(initialState?: Partial<CanvasState>) {
@@ -34,6 +36,7 @@ export class CanvasStore {
       ...initialState,
       elements: initialState?.elements ?? initialCanvasState.elements,
     };
+    this.rebuildVisibilityIndex();
   }
 
   getState(): CanvasState {
@@ -62,6 +65,14 @@ export class CanvasStore {
 
   getDuration(): number {
     return getCompositionDuration(this.state.elements);
+  }
+
+  getActiveElementIds(time: number): string[] {
+    return this.visibilityTimeline.getActiveIds(time);
+  }
+
+  getNextVisibilityBoundaryAfter(time: number): number | null {
+    return this.visibilityTimeline.getNextBoundaryAfter(time);
   }
 
   getElement(id: string): CanvasElement | undefined {
@@ -96,6 +107,7 @@ export class CanvasStore {
 
     const added = this.getElement(element.id);
     if (added) {
+      this.rebuildVisibilityIndex();
       this.commit(previous, { element: added });
     }
 
@@ -121,6 +133,7 @@ export class CanvasStore {
 
     const updated = this.getElement(id);
     if (updated) {
+      this.rebuildVisibilityIndex();
       this.commit(previous, { id, patch, element: updated });
     }
   }
@@ -139,6 +152,7 @@ export class CanvasStore {
       selectedId: this.state.selectedId === id ? null : this.state.selectedId,
     };
 
+    this.rebuildVisibilityIndex();
     this.commit(previous, { removedId: id, removedElement: element });
     return true;
   }
@@ -178,6 +192,7 @@ export class CanvasStore {
 
     this.state = { ...this.state, elements: normalizeZIndex(elements) };
     this.commit(previous);
+    this.events.emit('elements:reordered', { elements: this.state.elements });
   }
 
   sendBackward(id: string): void {
@@ -193,6 +208,7 @@ export class CanvasStore {
 
     this.state = { ...this.state, elements: normalizeZIndex(elements) };
     this.commit(previous);
+    this.events.emit('elements:reordered', { elements: this.state.elements });
   }
 
   setZIndex(id: string, zIndex: number): void {
@@ -209,6 +225,7 @@ export class CanvasStore {
 
     this.state = { ...this.state, elements: normalizeZIndex(elements) };
     this.commit(previous);
+    this.events.emit('elements:reordered', { elements: this.state.elements });
   }
 
   private commit(
@@ -268,5 +285,9 @@ export class CanvasStore {
     for (const listener of this.listeners) {
       listener();
     }
+  }
+
+  private rebuildVisibilityIndex(): void {
+    this.visibilityTimeline.rebuild(this.state.elements);
   }
 }

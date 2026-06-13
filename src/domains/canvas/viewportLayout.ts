@@ -56,10 +56,34 @@ export function observeViewportLayout(
   playerSize: CanvasSize,
   onLayout: (layout: ViewportLayout) => void,
 ): () => void {
+  let rafId: number | null = null;
+  let lastLayout: ViewportLayout | null = null;
+
   const updateLayout = () => {
-    const { width, height } = main.getBoundingClientRect();
-    const labelHeight = label?.offsetHeight ?? 0;
-    onLayout(computeViewportLayout({ width, height }, playerSize, labelHeight));
+    if (rafId !== null) {
+      return;
+    }
+
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      const { width, height } = main.getBoundingClientRect();
+      const labelHeight = label?.offsetHeight ?? 0;
+      const nextLayout = computeViewportLayout({ width, height }, playerSize, labelHeight);
+
+      if (
+        lastLayout &&
+        lastLayout.scale === nextLayout.scale &&
+        lastLayout.displayWidth === nextLayout.displayWidth &&
+        lastLayout.displayHeight === nextLayout.displayHeight &&
+        lastLayout.mainWidth === nextLayout.mainWidth &&
+        lastLayout.mainHeight === nextLayout.mainHeight
+      ) {
+        return;
+      }
+
+      lastLayout = nextLayout;
+      onLayout(nextLayout);
+    });
   };
 
   updateLayout();
@@ -70,5 +94,10 @@ export function observeViewportLayout(
     observer.observe(label);
   }
 
-  return () => observer.disconnect();
+  return () => {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+    }
+    observer.disconnect();
+  };
 }
