@@ -14,6 +14,7 @@ export interface AddMediaOptions {
   zIndex?: number;
   name?: string;
   transform?: Partial<ElementTransform>;
+  startTime?: number;
 }
 
 export interface RenderOptions {
@@ -38,6 +39,7 @@ export interface CompositionCanvasAPI {
   getAspectRatio(): AspectRatioId;
   getPlayerSize(): CanvasSize;
   render(time: number, options?: RenderOptions): void;
+  getCurrentTime(): number;
   getDuration(): number;
   getState(): CanvasState;
   on<T extends CanvasEventType>(event: T, handler: CanvasEventHandler<T>): () => void;

@@ -70,7 +70,10 @@ export class PlaybackControls extends UIComponent {
       this.seekTo(Number(seek.value));
     });
 
-    this.track(this.api.on('state:changed', () => this.updateUi()));
+    this.track(this.api.on('state:changed', () => this.syncDuration()));
+    this.track(this.api.on('element:added', () => this.syncDuration()));
+    this.track(this.api.on('element:removed', () => this.syncDuration()));
+    this.track(this.api.on('element:updated', () => this.syncDuration()));
 
     this.render();
   }
@@ -168,6 +171,20 @@ export class PlaybackControls extends UIComponent {
       this.rafId = null;
     }
     this.lastFrameTimestamp = null;
+  }
+
+  private syncDuration(): void {
+    const duration = this.api.getDuration();
+
+    if (this.currentTime > duration) {
+      this.currentTime = duration;
+      this.api.render(this.currentTime, {
+        playing: this.isPlaying,
+        playbackStartedAt: this.playbackStartedAt,
+      });
+    }
+
+    this.updateUi();
   }
 
   private updateUi(): void {

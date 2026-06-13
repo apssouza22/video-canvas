@@ -111,6 +111,8 @@ export class CanvasStore {
       playerSize: this.state.playerSize,
     });
 
+    element.startTime = options.startTime ?? 0;
+
     if (options.name) {
       element.name = options.name;
     }

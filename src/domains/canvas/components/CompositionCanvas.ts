@@ -16,6 +16,7 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
   readonly element: HTMLElement;
   private readonly store: CanvasStore;
   private viewport: CanvasViewport | null = null;
+  private currentTime = 0;
 
   constructor(container: HTMLElement, options: CompositionCanvasOptions = {}) {
     this.element = container;
@@ -35,7 +36,10 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
   }
 
   addMedia(options: AddMediaOptions): string {
-    return this.store.addMedia(options);
+    return this.store.addMedia({
+      ...options,
+      startTime: options.startTime ?? this.currentTime,
+    });
   }
 
   removeElement(id: string): boolean {
@@ -91,7 +95,12 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
   }
 
   render(time: number, options: RenderOptions = {}): void {
+    this.currentTime = time;
     this.viewport?.render(time, options);
+  }
+
+  getCurrentTime(): number {
+    return this.currentTime;
   }
 
   getDuration(): number {

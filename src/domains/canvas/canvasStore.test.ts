@@ -104,4 +104,15 @@ describe('CanvasStore', () => {
 
     expect(store.getDuration()).toBe(11);
   });
+
+  it('places new media at the provided start time', () => {
+    const store = new CanvasStore();
+    store.addElement({ ...textElement, duration: 4 });
+
+    const imageId = store.addMedia({ type: 'image', startTime: 2 });
+    const image = store.getElement(imageId);
+
+    expect(image?.startTime).toBe(2);
+    expect(store.getDuration()).toBe(7);
+  });
 });
