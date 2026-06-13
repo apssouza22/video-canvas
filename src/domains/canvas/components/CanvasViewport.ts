@@ -2,6 +2,7 @@ import type { RenderOptions } from '../compositionCanvasApi';
 import type { CanvasStore } from '../canvasStore';
 import type { Disposable } from '../core/Disposable';
 import type { CanvasElement } from '../types';
+import { getElementHandler } from '../elements';
 import { createInitialLayout, observeViewportLayout, type ViewportLayout } from '../viewportLayout';
 import { getVideoMediaTime } from '../utils/timing';
 import {
@@ -297,9 +298,12 @@ export class CanvasViewport implements Disposable {
     const state = this.store.getState();
     const selected =
       !this.renderOptions.playing && state.selectedId
-        ? state.elements.find(
-            (element) => element.id === state.selectedId && element.type !== 'audio',
-          ) ?? null
+        ? state.elements.find((element) => {
+            if (element.id !== state.selectedId) {
+              return false;
+            }
+            return getElementHandler(element).isSelectable;
+          }) ?? null
         : null;
 
     this.syncOverlay(selected);
@@ -367,7 +371,7 @@ export class CanvasViewport implements Disposable {
   ): void {
     if (
       !isPlaying ||
-      element.type !== 'video' ||
+      !getElementHandler(element).supportsVideoFrameSync ||
       !(entry.media instanceof HTMLVideoElement) ||
       entry.node.hidden
     ) {

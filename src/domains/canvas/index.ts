@@ -10,6 +10,15 @@ export type { CompositionCanvasOptions } from './components/CompositionCanvas';
 export { CanvasViewport } from './components/CanvasViewport';
 export { CanvasStore, initialCanvasState } from './canvasStore';
 export { createCanvasElement } from './elementFactory';
+export {
+  AudioElementHandler,
+  BaseCanvasElementHandler,
+  ImageElementHandler,
+  TextElementHandler,
+  VideoElementHandler,
+  getElementHandler,
+  getElementHandlerByType,
+} from './elements';
 export type {
   CompositionCanvasAPI,
   CanvasEventHandler,

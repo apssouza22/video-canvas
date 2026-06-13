@@ -7,8 +7,6 @@ import type {
   TextCanvasElement,
   VideoCanvasElement,
 } from './types';
-import { createElementId } from './utils/id';
-import { DEFAULT_ELEMENT_DURATION } from './utils/timing';
 
 export interface ClipBuildContext {
   zIndex: number;
@@ -78,22 +76,16 @@ export class AudioClip implements CompositionClip {
   }
 
   toElement({ zIndex }: ClipBuildContext): AudioCanvasElement {
-    return {
-      id: createElementId(),
+    const defaults = createCanvasElement({
       type: 'audio',
-      name: 'Audio',
-      zIndex,
       src: this.src,
+      zIndex,
+    }) as AudioCanvasElement;
+
+    return {
+      ...defaults,
       startTime: this.startTime,
-      duration: this.duration ?? DEFAULT_ELEMENT_DURATION,
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      rotation: 0,
-      opacity: 1,
-      loop: false,
-      volume: 1,
+      duration: this.duration ?? defaults.duration,
     };
   }
 }
