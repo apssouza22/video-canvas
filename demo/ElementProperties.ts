@@ -1,5 +1,5 @@
-import type { CompositionCanvasAPI } from '../src/domains/canvas/compositionCanvasApi';
-import type { CanvasElement } from '../src/domains/canvas/types';
+import type { CompositionCanvasAPI } from '../src/common/compositionCanvasApi';
+import type { CanvasElement } from '../src/common/types';
 import { UIComponent } from './core/UIComponent';
 
 const panelClass =

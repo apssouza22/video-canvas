@@ -1,10 +1,10 @@
-import { CompositionCanvas } from '../src/domains/canvas/components/CompositionCanvas';
+import { CompositionCanvas } from '../src/common/CompositionCanvas';
 import { CanvasToolbar } from './CanvasToolbar';
 import { ElementPropertiesPanel } from './ElementProperties';
 import { PlayerSettingsPanel } from './PlayerSettings';
-import type { Disposable } from '../src/domains/canvas/core/Disposable';
-import { createCanvasElement } from '../src/domains/canvas/elementFactory';
-import type { CanvasElement } from '../src/domains/canvas/types';
+import type { Disposable } from '../src/common/Disposable';
+import { createCanvasElement } from '../src/common/elementFactory';
+import type { CanvasElement } from '../src/common/types';
 import { CanvasEventLogPanel } from './CanvasEventLogPanel';
 import { PlaybackControls } from './PlaybackControls';
 

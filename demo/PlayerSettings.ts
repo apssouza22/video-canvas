@@ -1,6 +1,6 @@
-import type { CompositionCanvasAPI } from '../src/domains/canvas/compositionCanvasApi';
-import type { AspectRatioId } from '../src/domains/canvas/types';
-import { ASPECT_RATIO_PRESETS } from '../src/domains/canvas/utils/player';
+import type { CompositionCanvasAPI } from '../src/common/compositionCanvasApi';
+import type { AspectRatioId } from '../src/common/types';
+import { ASPECT_RATIO_PRESETS } from '../src/viewport/player';
 import { UIComponent } from './core/UIComponent';
 
 const panelClass =

@@ -1,4 +1,4 @@
-import type { CompositionCanvasAPI } from '../src/domains/canvas/compositionCanvasApi';
+import type { CompositionCanvasAPI } from '../src/common/compositionCanvasApi';
 import { UIComponent } from './core/UIComponent';
 
 function formatTime(seconds: number): string {

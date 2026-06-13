@@ -1,7 +1,7 @@
-import type { CompositionCanvasAPI } from '../src/domains/canvas/compositionCanvasApi';
-import { ImageClip, TextClip, VideoClip } from '../src/domains/canvas/clips';
-import { SAMPLE_VIDEO_SRC } from '../src/domains/canvas/constants';
-import type { CanvasElementType } from '../src/domains/canvas/types';
+import type { CompositionCanvasAPI } from '../src/common/compositionCanvasApi';
+import { ImageClip, TextClip, VideoClip } from '../src';
+import { SAMPLE_VIDEO_SRC } from '../src/video/constants';
+import type { CanvasElementType } from '../src/common/types';
 import { UIComponent } from './core/UIComponent';
 
 const panelClass =
