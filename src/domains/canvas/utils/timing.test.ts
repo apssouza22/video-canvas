@@ -20,6 +20,7 @@ const textElement: TextCanvasElement = {
   rotation: 0,
   startTime: 2,
   duration: 4,
+  opacity: 1,
   content: 'Hello',
   fontSize: 24,
   fontFamily: 'Inter',

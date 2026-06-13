@@ -15,10 +15,15 @@ export function createCanvasElementNode(
   node.dataset.elementId = element.id;
   applyElementStyles(node, element);
 
-  node.addEventListener('pointerdown', (event) => {
-    event.stopPropagation();
-    onSelect(element.id);
-  });
+  if (element.type === 'audio') {
+    node.style.display = 'none';
+    node.style.pointerEvents = 'none';
+  } else {
+    node.addEventListener('pointerdown', (event) => {
+      event.stopPropagation();
+      onSelect(element.id);
+    });
+  }
 
   node.replaceChildren(createElementContent(element));
   return node;
@@ -30,7 +35,9 @@ export function updateCanvasElementNode(
 ): void {
   applyElementStyles(node, element);
 
-  const media = node.querySelector<HTMLVideoElement | HTMLImageElement>('.canvas-element__media');
+  const media = node.querySelector<HTMLVideoElement | HTMLImageElement | HTMLAudioElement>(
+    '.canvas-element__media',
+  );
   const text = node.querySelector<HTMLDivElement>('.canvas-element__text');
 
   if (element.type === 'video' && media instanceof HTMLVideoElement) {
@@ -48,6 +55,15 @@ export function updateCanvasElementNode(
     }
     media.alt = element.name;
     media.style.objectFit = element.objectFit;
+    return;
+  }
+
+  if (element.type === 'audio' && media instanceof HTMLAudioElement) {
+    if (media.src !== element.src) {
+      media.src = element.src;
+    }
+    media.loop = element.loop;
+    media.volume = element.volume;
     return;
   }
 
@@ -72,6 +88,7 @@ function applyElementStyles(node: HTMLDivElement, element: CanvasElementType): v
     transform: style.transform,
     transformOrigin: style.transformOrigin,
     zIndex: String(element.zIndex),
+    opacity: String(element.opacity),
   });
 }
 
@@ -97,6 +114,16 @@ function createElementContent(element: CanvasElementType): HTMLElement {
     return image;
   }
 
+  if (element.type === 'audio') {
+    const audio = document.createElement('audio');
+    audio.className = 'canvas-element__media';
+    audio.src = element.src;
+    audio.loop = element.loop;
+    audio.volume = element.volume;
+    audio.preload = 'auto';
+    return audio;
+  }
+
   const text = document.createElement('div');
   text.className =
     'canvas-element__text flex items-center justify-center p-2 box-border whitespace-pre-wrap break-words w-full h-full pointer-events-none';
@@ -116,32 +143,32 @@ export function syncElementPlayback(
   compositionTime: number,
   options: RenderOptions = {},
 ): void {
-  if (element.type !== 'video' || node.hidden) {
+  if ((element.type !== 'video' && element.type !== 'audio') || node.hidden) {
     return;
   }
 
-  const video = node.querySelector<HTMLVideoElement>('.canvas-element__media');
-  if (!video) {
+  const media = node.querySelector<HTMLVideoElement | HTMLAudioElement>('.canvas-element__media');
+  if (!media) {
     return;
   }
 
   const isPlaying = options.playing ?? false;
   const mediaTime = getVideoMediaTime(element, compositionTime, options);
 
-  if (Math.abs(video.currentTime - mediaTime) > 0.15) {
+  if (Math.abs(media.currentTime - mediaTime) > 0.15) {
     try {
-      video.currentTime = mediaTime;
+      media.currentTime = mediaTime;
     } catch {
       // Ignore seek errors while metadata is loading.
     }
   }
 
   if (isPlaying) {
-    void video.play().catch(() => {
+    void media.play().catch(() => {
       // Autoplay may be blocked until the user interacts with the page.
     });
     return;
   }
 
-  video.pause();
+  media.pause();
 }

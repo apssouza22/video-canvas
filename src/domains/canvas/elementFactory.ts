@@ -26,6 +26,7 @@ export function createCanvasElement({
     rotation: 0,
     startTime: 0,
     duration: DEFAULT_ELEMENT_DURATION,
+    opacity: 1,
   };
 
   if (type === 'video') {

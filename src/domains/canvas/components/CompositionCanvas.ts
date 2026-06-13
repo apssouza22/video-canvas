@@ -1,5 +1,6 @@
+import type { CompositionClip } from '../clips';
 import { CanvasStore } from '../canvasStore';
-import type { AddMediaOptions, CompositionCanvasAPI, RenderOptions } from '../compositionCanvasApi';
+import type { CompositionCanvasAPI, RenderOptions } from '../compositionCanvasApi';
 import type { CanvasEventHandler, CanvasEventType } from '../events';
 import type { Disposable } from '../core/Disposable';
 import type { AspectRatioId, CanvasElement, CanvasSize, CanvasState } from '../types';
@@ -35,11 +36,9 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
     this.render(0);
   }
 
-  addMedia(options: AddMediaOptions): string {
-    return this.store.addMedia({
-      ...options,
-      startTime: options.startTime ?? this.currentTime,
-    });
+  addLayer(clip: CompositionClip): this {
+    this.store.addLayer(clip);
+    return this;
   }
 
   removeElement(id: string): boolean {

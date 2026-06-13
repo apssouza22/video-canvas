@@ -1,10 +1,16 @@
+export {
+  AudioClip,
+  ImageClip,
+  TextClip,
+  VideoClip,
+} from './clips';
+export type { ClipBuildContext, CompositionClip } from './clips';
 export { CompositionCanvas, mountCompositionCanvas } from './components/CompositionCanvas';
 export type { CompositionCanvasOptions } from './components/CompositionCanvas';
 export { CanvasViewport } from './components/CanvasViewport';
 export { CanvasStore, initialCanvasState } from './canvasStore';
 export { createCanvasElement } from './elementFactory';
 export type {
-  AddMediaOptions,
   CompositionCanvasAPI,
   CanvasEventHandler,
   CanvasEventMap,
@@ -41,6 +47,7 @@ export type {
   CanvasSize,
   CanvasState,
   ElementTransform,
+  AudioCanvasElement,
   ImageCanvasElement,
   TextCanvasElement,
   VideoCanvasElement,

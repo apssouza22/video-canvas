@@ -166,7 +166,9 @@ export class CanvasViewport implements Disposable {
     const state = this.store.getState();
     const selected =
       !this.renderOptions.playing && state.selectedId
-        ? state.elements.find((element) => element.id === state.selectedId) ?? null
+        ? state.elements.find(
+            (element) => element.id === state.selectedId && element.type !== 'audio',
+          ) ?? null
         : null;
 
     this.syncOverlay(selected);

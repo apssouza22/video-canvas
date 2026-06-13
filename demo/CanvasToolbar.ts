@@ -1,4 +1,6 @@
 import type { CompositionCanvasAPI } from '../src/domains/canvas/compositionCanvasApi';
+import { ImageClip, TextClip, VideoClip } from '../src/domains/canvas/clips';
+import { SAMPLE_VIDEO_SRC } from '../src/domains/canvas/constants';
 import type { CanvasElementType } from '../src/domains/canvas/types';
 import { UIComponent } from './core/UIComponent';
 
@@ -113,7 +115,19 @@ export class CanvasToolbar extends UIComponent {
   }
 
   private addByType(type: CanvasElementType, src?: string): void {
-    this.api.addMedia({ type, src });
+    const startTime = this.api.getCurrentTime();
+
+    if (type === 'text') {
+      this.api.addLayer(new TextClip('Double-click style editing in the panel →', startTime));
+      return;
+    }
+
+    if (type === 'video') {
+      this.api.addLayer(new VideoClip(src ?? SAMPLE_VIDEO_SRC, startTime));
+      return;
+    }
+
+    this.api.addLayer(new ImageClip(src ?? '', startTime));
   }
 
   private handleFile(type: 'image' | 'video', file: File | undefined): void {

@@ -1,4 +1,4 @@
-export type CanvasElementType = 'video' | 'image' | 'text';
+export type CanvasElementType = 'video' | 'image' | 'text' | 'audio';
 
 export interface ElementTransform {
   x: number;
@@ -17,6 +17,8 @@ interface CanvasElementBase extends ElementTransform {
   startTime: number;
   /** How long the element stays visible, in seconds. */
   duration: number;
+  /** Layer opacity from 0 (transparent) to 1 (opaque). */
+  opacity: number;
 }
 
 export interface VideoCanvasElement extends CanvasElementBase {
@@ -43,7 +45,18 @@ export interface TextCanvasElement extends CanvasElementBase {
   backgroundColor: string;
 }
 
-export type CanvasElement = VideoCanvasElement | ImageCanvasElement | TextCanvasElement;
+export interface AudioCanvasElement extends CanvasElementBase {
+  type: 'audio';
+  src: string;
+  loop: boolean;
+  volume: number;
+}
+
+export type CanvasElement =
+  | VideoCanvasElement
+  | ImageCanvasElement
+  | TextCanvasElement
+  | AudioCanvasElement;
 
 export interface CanvasSize {
   width: number;

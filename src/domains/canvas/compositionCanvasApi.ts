@@ -1,21 +1,11 @@
+import type { CompositionClip } from './clips';
 import type { CanvasEventHandler, CanvasEventMap, CanvasEventType } from './events';
 import type {
   AspectRatioId,
   CanvasElement,
-  CanvasElementType,
   CanvasSize,
   CanvasState,
-  ElementTransform,
 } from './types';
-
-export interface AddMediaOptions {
-  type: CanvasElementType;
-  src?: string;
-  zIndex?: number;
-  name?: string;
-  transform?: Partial<ElementTransform>;
-  startTime?: number;
-}
 
 export interface RenderOptions {
   playing?: boolean;
@@ -24,7 +14,7 @@ export interface RenderOptions {
 }
 
 export interface CompositionCanvasAPI {
-  addMedia(options: AddMediaOptions): string;
+  addLayer(clip: CompositionClip): CompositionCanvasAPI;
   removeElement(id: string): boolean;
   updateElement(id: string, patch: Partial<CanvasElement>): void;
   getElement(id: string): CanvasElement | undefined;

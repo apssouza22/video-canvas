@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ImageClip } from './clips';
 import { CanvasStore } from './canvasStore';
 import type { TextCanvasElement } from './types';
 
@@ -14,6 +15,7 @@ const textElement: TextCanvasElement = {
   rotation: 0,
   startTime: 0,
   duration: 5,
+  opacity: 1,
   content: 'Hello',
   fontSize: 32,
   fontFamily: 'Inter',
@@ -105,12 +107,12 @@ describe('CanvasStore', () => {
     expect(store.getDuration()).toBe(11);
   });
 
-  it('places new media at the provided start time', () => {
+  it('places new layers at the provided start time', () => {
     const store = new CanvasStore();
     store.addElement({ ...textElement, duration: 4 });
 
-    const imageId = store.addMedia({ type: 'image', startTime: 2 });
-    const image = store.getElement(imageId);
+    store.addLayer(new ImageClip('', 2));
+    const image = store.getElements().find((element) => element.type === 'image');
 
     expect(image?.startTime).toBe(2);
     expect(store.getDuration()).toBe(7);

@@ -1,6 +1,5 @@
-import type { AddMediaOptions } from './compositionCanvasApi';
+import type { CompositionClip } from './clips';
 import { DEFAULT_ASPECT_RATIO, DEFAULT_PLAYER_SIZE } from './constants';
-import { createCanvasElement } from './elementFactory';
 import type { CanvasEventHandler, CanvasEventType } from './events';
 import { CanvasEventEmitter } from './events';
 import type { AspectRatioId, CanvasElement, CanvasState } from './types';
@@ -103,23 +102,11 @@ export class CanvasStore {
     return element.id;
   }
 
-  addMedia(options: AddMediaOptions): string {
-    const element = createCanvasElement({
-      type: options.type,
-      src: options.src,
-      zIndex: options.zIndex ?? this.state.elements.length,
+  addLayer(clip: CompositionClip): string {
+    const element = clip.toElement({
+      zIndex: this.state.elements.length,
       playerSize: this.state.playerSize,
     });
-
-    element.startTime = options.startTime ?? 0;
-
-    if (options.name) {
-      element.name = options.name;
-    }
-
-    if (options.transform) {
-      Object.assign(element, options.transform);
-    }
 
     return this.addElement(element);
   }
