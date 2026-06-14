@@ -1,8 +1,14 @@
 {
-  "name": "video-canvas",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@opensource/video-canvas",
+  "version": "0.1.0",
+  "description": "Framework-agnostic composition canvas for video editing",
   "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./style.css": "./src/index.css"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
