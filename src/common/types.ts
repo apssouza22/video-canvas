@@ -26,6 +26,8 @@ export interface VideoCanvasElement extends CanvasElementBase {
   src: string;
   muted: boolean;
   loop: boolean;
+  /** Trim offset into the source file, in seconds. */
+  sourceOffset?: number;
 }
 
 export interface ImageCanvasElement extends CanvasElementBase {
@@ -50,6 +52,8 @@ export interface AudioCanvasElement extends CanvasElementBase {
   src: string;
   loop: boolean;
   volume: number;
+  /** Trim offset into the source file, in seconds. */
+  sourceOffset?: number;
 }
 
 export type CanvasElement =

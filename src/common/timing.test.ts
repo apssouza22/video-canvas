@@ -61,4 +61,12 @@ describe('timing utils', () => {
     expect(getVideoMediaTime(clip, 10, { playing: true, playbackStartedAt: 8 })).toBe(2);
     expect(getVideoMediaTime(clip, 10, { playing: true, playbackStartedAt: 0 })).toBe(6);
   });
+
+  it('applies source offset for trimmed clips', () => {
+    const clip = { startTime: 0, duration: 5, sourceOffset: 2 };
+
+    expect(getVideoMediaTime(clip, 0)).toBe(2);
+    expect(getVideoMediaTime(clip, 3)).toBe(5);
+    expect(getVideoMediaTime(clip, 5, { playing: true, playbackStartedAt: 0 })).toBe(7);
+  });
 });

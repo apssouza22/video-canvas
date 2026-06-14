@@ -2,6 +2,12 @@ import { createCanvasElement } from '../common/elementFactory';
 import type { ClipBuildContext, CompositionClip } from '../common/clips';
 import type { VideoCanvasElement } from '../common/types';
 
+export interface VideoClipOptions {
+  sourceOffset?: number;
+  /** When false, the video element plays its own audio track. Defaults to true. */
+  muted?: boolean;
+}
+
 export class VideoClip implements CompositionClip {
   readonly src: string;
   readonly startTime: number;
@@ -10,6 +16,8 @@ export class VideoClip implements CompositionClip {
   readonly y?: number;
   readonly width?: number;
   readonly height?: number;
+  readonly sourceOffset?: number;
+  readonly muted?: boolean;
 
   constructor(
     src: string,
@@ -19,6 +27,7 @@ export class VideoClip implements CompositionClip {
     y?: number,
     width?: number,
     height?: number,
+    options: VideoClipOptions = {},
   ) {
     this.src = src;
     this.startTime = startTime;
@@ -27,6 +36,8 @@ export class VideoClip implements CompositionClip {
     this.y = y;
     this.width = width;
     this.height = height;
+    this.sourceOffset = options.sourceOffset;
+    this.muted = options.muted;
   }
 
   toElement({ zIndex, playerSize }: ClipBuildContext): VideoCanvasElement {
@@ -45,6 +56,8 @@ export class VideoClip implements CompositionClip {
       y: this.y ?? defaults.y,
       width: this.width ?? defaults.width,
       height: this.height ?? defaults.height,
+      sourceOffset: this.sourceOffset ?? 0,
+      muted: this.muted ?? defaults.muted,
     };
   }
 }

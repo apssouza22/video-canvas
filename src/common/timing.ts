@@ -39,17 +39,19 @@ export function getElementLocalTime(
  * became visible — whichever is later — not from the composition origin.
  */
 export function getVideoMediaTime(
-  element: Pick<CanvasElement, 'startTime' | 'duration'>,
+  element: Pick<CanvasElement, 'startTime' | 'duration'> & { sourceOffset?: number },
   compositionTime: number,
   options: { playing?: boolean; playbackStartedAt?: number } = {},
 ): number {
   const startTime = element.startTime ?? 0;
+  const sourceOffset = element.sourceOffset ?? 0;
 
   if (!options.playing) {
-    return Math.min(getElementLocalTime(element, compositionTime), element.duration);
+    const local = getElementLocalTime(element, compositionTime);
+    return Math.min(sourceOffset + local, sourceOffset + element.duration);
   }
 
   const anchor = Math.max(options.playbackStartedAt ?? startTime, startTime);
   const elapsed = Math.max(0, compositionTime - anchor);
-  return Math.min(elapsed, element.duration);
+  return Math.min(sourceOffset + elapsed, sourceOffset + element.duration);
 }
