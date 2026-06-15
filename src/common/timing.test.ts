@@ -57,9 +57,16 @@ describe('timing utils', () => {
     expect(getVideoMediaTime(clip, 3)).toBe(0);
     expect(getVideoMediaTime(clip, 7)).toBe(3);
 
-    expect(getVideoMediaTime(clip, 8, { playing: true, playbackStartedAt: 8 })).toBe(0);
-    expect(getVideoMediaTime(clip, 10, { playing: true, playbackStartedAt: 8 })).toBe(2);
+    expect(getVideoMediaTime(clip, 8, { playing: true, playbackStartedAt: 8 })).toBe(4);
+    expect(getVideoMediaTime(clip, 10, { playing: true, playbackStartedAt: 8 })).toBe(6);
     expect(getVideoMediaTime(clip, 10, { playing: true, playbackStartedAt: 0 })).toBe(6);
+  });
+
+  it('resumes playback from the current playhead when starting mid-clip', () => {
+    const clip = { startTime: 0, duration: 60 };
+
+    expect(getVideoMediaTime(clip, 10, { playing: true, playbackStartedAt: 10 })).toBe(10);
+    expect(getVideoMediaTime(clip, 12, { playing: true, playbackStartedAt: 10 })).toBe(12);
   });
 
   it('applies source offset for trimmed clips', () => {

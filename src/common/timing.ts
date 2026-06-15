@@ -35,8 +35,8 @@ export function getElementLocalTime(
 
 /**
  * Position within the video source file in seconds.
- * When playing, time is measured from when playback began or the element
- * became visible — whichever is later — not from the composition origin.
+ * When playing, time advances from the playhead position at playback start,
+ * but only while the clip is visible (after its startTime).
  */
 export function getVideoMediaTime(
   element: Pick<CanvasElement, 'startTime' | 'duration'> & { sourceOffset?: number },
@@ -51,7 +51,9 @@ export function getVideoMediaTime(
     return Math.min(sourceOffset + local, sourceOffset + element.duration);
   }
 
-  const anchor = Math.max(options.playbackStartedAt ?? startTime, startTime);
+  const playbackStartedAt = options.playbackStartedAt ?? startTime;
+  const anchor = Math.max(playbackStartedAt, startTime);
+  const localTimeAtAnchor = Math.max(0, anchor - startTime);
   const elapsed = Math.max(0, compositionTime - anchor);
-  return Math.min(sourceOffset + elapsed, sourceOffset + element.duration);
+  return Math.min(sourceOffset + localTimeAtAnchor + elapsed, sourceOffset + element.duration);
 }
