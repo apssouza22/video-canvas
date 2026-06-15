@@ -11,6 +11,8 @@ export interface RenderOptions {
   playing?: boolean;
   /** Composition time when the current playback session started. */
   playbackStartedAt?: number;
+  /** Timeline playback speed multiplier (e.g. 2 for 2x). */
+  playbackRate?: number;
 }
 
 export interface CompositionCanvasAPI {

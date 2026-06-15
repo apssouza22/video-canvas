@@ -89,6 +89,26 @@ export function bindElementSelection(
   });
 }
 
+function applyMediaPlaybackRate(
+  media: HTMLVideoElement | HTMLAudioElement,
+  node: HTMLDivElement,
+  rate: number,
+): void {
+  const normalizedRate = rate > 0 ? rate : 1;
+
+  if (media.playbackRate !== normalizedRate) {
+    media.playbackRate = normalizedRate;
+    // Restart the playback session so media re-seeks with the new rate.
+    if (node.dataset.mediaPlaying === 'true') {
+      node.dataset.mediaPlaying = 'false';
+    }
+  }
+
+  if (media.preservesPitch !== true) {
+    media.preservesPitch = true;
+  }
+}
+
 export function syncMediaPlayback(
   refs: CanvasElementNodeRefs,
   element: CanvasElement,
@@ -99,6 +119,8 @@ export function syncMediaPlayback(
   if (node.hidden || !(media instanceof HTMLVideoElement || media instanceof HTMLAudioElement)) {
     return;
   }
+
+  applyMediaPlaybackRate(media, node, options.playbackRate ?? 1);
 
   const isPlaying = options.playing ?? false;
   const mediaTime = getVideoMediaTime(element, compositionTime, options);
