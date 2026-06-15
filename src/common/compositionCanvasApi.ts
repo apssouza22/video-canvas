@@ -36,6 +36,7 @@ export interface CompositionCanvasAPI {
   getActiveElementIds(time?: number): string[];
   getNextVisibilityBoundaryAfter(time?: number): number | null;
   getState(): CanvasState;
+  loadState(state: CanvasState): void;
   on<T extends CanvasEventType>(event: T, handler: CanvasEventHandler<T>): () => void;
   off<T extends CanvasEventType>(event: T, handler: CanvasEventHandler<T>): void;
 }

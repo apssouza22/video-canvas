@@ -83,6 +83,17 @@ export class CanvasStore {
     return [...this.state.elements];
   }
 
+  loadState(state: CanvasState): void {
+    const previous = this.state;
+    this.state = {
+      ...initialCanvasState,
+      ...state,
+      elements: state.elements ?? initialCanvasState.elements,
+    };
+    this.rebuildVisibilityIndex();
+    this.commit(previous);
+  }
+
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);

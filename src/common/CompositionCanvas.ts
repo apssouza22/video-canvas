@@ -118,6 +118,11 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
     return this.store.getState();
   }
 
+  loadState(state: CanvasState): void {
+    this.store.loadState(state);
+    this.render(this.currentTime, { playing: false });
+  }
+
   on<T extends CanvasEventType>(event: T, handler: CanvasEventHandler<T>): () => void {
     return this.store.on(event, handler);
   }
