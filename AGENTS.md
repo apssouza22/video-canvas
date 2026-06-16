@@ -47,7 +47,7 @@ PR titles **must** start with a valid JIRA ID:
 
 ## Local Development URLs
 
-- **Frontend Dev Server:** http://localhost:5555
+- **Frontend Dev Server:** http://localhost:5554
 
 
 # Task execution plan

@@ -14,7 +14,8 @@ export default defineConfig({
   },
   plugins: [tailwindcss()],
   server: {
-    port: 5555,
+    port: 5554,
+    strictPort: true,
   },
   test: {
     root: projectRoot,
