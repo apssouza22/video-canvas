@@ -1,4 +1,3 @@
-import type { CompositionClip } from './clips';
 import { DEFAULT_ASPECT_RATIO, DEFAULT_PLAYER_SIZE } from './constants';
 import type { CanvasEventHandler, CanvasEventType } from '../event/events';
 import { CanvasEventEmitter } from '../event/events';
@@ -123,15 +122,6 @@ export class CanvasStore {
     }
 
     return element.id;
-  }
-
-  addLayer(clip: CompositionClip): string {
-    const element = clip.toElement({
-      zIndex: this.state.elements.length,
-      playerSize: this.state.playerSize,
-    });
-
-    return this.addElement(element);
   }
 
   updateElement(id: string, patch: Partial<CanvasElement>): void {

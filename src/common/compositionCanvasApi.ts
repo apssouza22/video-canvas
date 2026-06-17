@@ -1,4 +1,3 @@
-import type { CompositionClip } from './clips';
 import type { CanvasEventHandler, CanvasEventMap, CanvasEventType } from '../event/events';
 import type {
   AspectRatioId,
@@ -16,7 +15,7 @@ export interface RenderOptions {
 }
 
 export interface CompositionCanvasAPI {
-  addLayer(clip: CompositionClip): CompositionCanvasAPI;
+  addElement(element: CanvasElement): string;
   removeElement(id: string): boolean;
   updateElement(id: string, patch: Partial<CanvasElement>): void;
   getElement(id: string): CanvasElement | undefined;

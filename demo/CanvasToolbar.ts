@@ -1,5 +1,5 @@
 import type { CompositionCanvasAPI } from '../src/common/compositionCanvasApi';
-import { ImageClip, TextClip, VideoClip } from '../src';
+import { createCanvasElement } from '../src/common/elementFactory';
 import { SAMPLE_VIDEO_SRC } from '../src/video/constants';
 import type { CanvasElementType } from '../src/common/types';
 import { UIComponent } from './core/UIComponent';
@@ -116,18 +116,34 @@ export class CanvasToolbar extends UIComponent {
 
   private addByType(type: CanvasElementType, src?: string): void {
     const startTime = this.api.getCurrentTime();
+    const zIndex = this.api.getElements().length;
+    const playerSize = this.api.getPlayerSize();
 
     if (type === 'text') {
-      this.api.addLayer(new TextClip('Double-click style editing in the panel →', startTime));
+      this.api.addElement({
+        ...createCanvasElement({ type: 'text', zIndex, playerSize }),
+        startTime,
+      });
       return;
     }
 
     if (type === 'video') {
-      this.api.addLayer(new VideoClip(src ?? SAMPLE_VIDEO_SRC, startTime));
+      this.api.addElement({
+        ...createCanvasElement({
+          type: 'video',
+          src: src ?? SAMPLE_VIDEO_SRC,
+          zIndex,
+          playerSize,
+        }),
+        startTime,
+      });
       return;
     }
 
-    this.api.addLayer(new ImageClip(src ?? '', startTime));
+    this.api.addElement({
+      ...createCanvasElement({ type: 'image', src: src ?? '', zIndex, playerSize }),
+      startTime,
+    });
   }
 
   private handleFile(type: 'image' | 'video', file: File | undefined): void {
@@ -138,9 +154,13 @@ export class CanvasToolbar extends UIComponent {
   }
 
   private updateLayerButtons(): void {
-    const hasSelection = this.api.getSelectedElement() !== null;
-    this.ref<HTMLButtonElement>('forward').disabled = !hasSelection;
-    this.ref<HTMLButtonElement>('backward').disabled = !hasSelection;
-    this.ref<HTMLButtonElement>('delete').disabled = !hasSelection;
+    const selected = this.api.getSelectedElement();
+    const forwardBtn = this.ref<HTMLButtonElement>('forward');
+    const backwardBtn = this.ref<HTMLButtonElement>('backward');
+    const deleteBtn = this.ref<HTMLButtonElement>('delete');
+
+    forwardBtn.disabled = !selected;
+    backwardBtn.disabled = !selected;
+    deleteBtn.disabled = !selected;
   }
 }

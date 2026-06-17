@@ -1,8 +1,5 @@
 import { describe, expect, it, beforeAll } from 'vitest';
-import { AudioClip } from '../audio/AudioClip';
-import { ImageClip } from '../image/ImageClip';
-import { TextClip } from '../text/TextClip';
-import { VideoClip } from '../video/VideoClip';
+import { createCanvasElement } from './elementFactory';
 import { CompositionCanvas } from './CompositionCanvas';
 
 beforeAll(() => {
@@ -16,15 +13,55 @@ beforeAll(() => {
 });
 
 describe('CompositionCanvas', () => {
-  it('supports fluent addLayer chaining', () => {
+  it('supports adding multiple element types', () => {
     const container = document.createElement('div');
+    const canvas = new CompositionCanvas(container);
+    const playerSize = canvas.getPlayerSize();
 
-    const canvas = new CompositionCanvas(container)
-      .addLayer(new VideoClip('samples/video.mp4', 0, 10, 0, 0, 1280, 720))
-      .addLayer(new VideoClip('samples/video.mp4', 0))
-      .addLayer(new AudioClip('samples/audio.mp3', 1, 8))
-      .addLayer(new TextClip('Title', 2, 6, 100, 100, 400, 120, 0.9))
-      .addLayer(new ImageClip('samples/cover.png', 0, 10, 200, 200, 300, 300, 0.8));
+    canvas.addElement({
+      ...createCanvasElement({ type: 'video', src: 'samples/video.mp4', zIndex: 0, playerSize }),
+      startTime: 0,
+      duration: 10,
+      x: 0,
+      y: 0,
+      width: 1280,
+      height: 720,
+    });
+    canvas.addElement({
+      ...createCanvasElement({ type: 'video', src: 'samples/video.mp4', zIndex: 1, playerSize }),
+      startTime: 0,
+    });
+    canvas.addElement({
+      ...createCanvasElement({ type: 'audio', src: 'samples/audio.mp3', zIndex: 2, playerSize }),
+      startTime: 1,
+      duration: 8,
+    });
+    canvas.addElement({
+      ...createCanvasElement({ type: 'text', zIndex: 3, playerSize }),
+      content: 'Title',
+      startTime: 2,
+      duration: 6,
+      x: 100,
+      y: 100,
+      width: 400,
+      height: 120,
+      opacity: 0.9,
+    });
+    canvas.addElement({
+      ...createCanvasElement({
+        type: 'image',
+        src: 'samples/cover.png',
+        zIndex: 4,
+        playerSize,
+      }),
+      startTime: 0,
+      duration: 10,
+      x: 200,
+      y: 200,
+      width: 300,
+      height: 300,
+      opacity: 0.8,
+    });
 
     const elements = canvas.getElements();
 

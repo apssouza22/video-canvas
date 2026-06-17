@@ -1,8 +1,3 @@
-export { AudioClip } from '../audio/AudioClip';
-export { ImageClip } from '../image/ImageClip';
-export { TextClip } from '../text/TextClip';
-export { VideoClip } from '../video/VideoClip';
-export type { ClipBuildContext, CompositionClip } from './clips';
 export { CompositionCanvas, mountCompositionCanvas } from './CompositionCanvas';
 export type { CompositionCanvasOptions } from './CompositionCanvas';
 export { CanvasStore, initialCanvasState } from './canvasStore';

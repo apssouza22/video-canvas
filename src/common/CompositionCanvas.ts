@@ -1,4 +1,3 @@
-import type { CompositionClip } from './clips';
 import { CanvasStore } from './canvasStore';
 import type { CompositionCanvasAPI, RenderOptions } from './compositionCanvasApi';
 import type { CanvasEventHandler, CanvasEventType } from '../event/events';
@@ -36,9 +35,8 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
     this.render(0);
   }
 
-  addLayer(clip: CompositionClip): this {
-    this.store.addLayer(clip);
-    return this;
+  addElement(element: CanvasElement): string {
+    return this.store.addElement(element);
   }
 
   removeElement(id: string): boolean {
