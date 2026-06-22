@@ -1,4 +1,4 @@
-import type { RenderOptions } from '../common/compositionCanvasApi';
+import type { RenderOptions } from '../common/compositionPreviewApi';
 import { BaseCanvasElementHandler } from '../common/BaseCanvasElementHandler';
 import {
   createElementBase,

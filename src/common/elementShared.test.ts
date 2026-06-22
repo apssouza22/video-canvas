@@ -56,4 +56,14 @@ describe('syncMediaPlayback', () => {
     expect(media.playbackRate).toBe(2);
     expect(refs.node.dataset.mediaPlaying).toBe('true');
   });
+
+  it('re-seeks media during playback after an external composition jump', () => {
+    const { refs, media } = createAudioRefs();
+    refs.node.dataset.mediaPlaying = 'true';
+    media.currentTime = 2;
+
+    syncMediaPlayback(refs, element, 10, { playing: true, playbackStartedAt: 10 });
+
+    expect(media.currentTime).toBe(10);
+  });
 });

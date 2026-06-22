@@ -1,4 +1,4 @@
-import { CompositionCanvas } from '../src/common/CompositionCanvas';
+import { CompositionPreview } from '../src/common/CompositionPreview';
 import { CanvasToolbar } from './CanvasToolbar';
 import { ElementPropertiesPanel } from './ElementProperties';
 import { PlayerSettingsPanel } from './PlayerSettings';
@@ -34,10 +34,10 @@ function createDemoElements(): CanvasElement[] {
   return elements;
 }
 
-export class CompositionCanvasDemo implements Disposable {
+export class CompositionPreviewDemo implements Disposable {
   private readonly container: HTMLElement;
   private readonly root: HTMLDivElement;
-  private readonly canvas: CompositionCanvas;
+  private readonly preview: CompositionPreview;
   private readonly children: Disposable[] = [];
 
   constructor(container: HTMLElement) {
@@ -54,7 +54,7 @@ export class CompositionCanvasDemo implements Disposable {
 
     const header = document.createElement('header');
     header.innerHTML = `
-      <h1 class="m-0 text-xl">CompositionCanvas Demo</h1>
+      <h1 class="m-0 text-xl">CompositionPreview Demo</h1>
       <p class="mt-1.5 mb-0 text-vc-muted text-sm leading-snug">Sidebar controls consume the canvas through its public API and event subscriptions.</p>
     `;
 
@@ -65,16 +65,16 @@ export class CompositionCanvasDemo implements Disposable {
     this.root.append(sidebar, main);
     this.container.append(this.root);
 
-    this.canvas = new CompositionCanvas(main, {
+    this.preview = new CompositionPreview(main, {
       initialState: { elements: demoElements, selectedId: null },
     });
 
     this.children.push(
-      new PlayerSettingsPanel(sidebar, this.canvas),
-      new CanvasToolbar(sidebar, this.canvas),
-      new ElementPropertiesPanel(sidebar, this.canvas),
-      new CanvasEventLogPanel(sidebar, this.canvas),
-      new PlaybackControls(main, this.canvas),
+      new PlayerSettingsPanel(sidebar, this.preview),
+      new CanvasToolbar(sidebar, this.preview),
+      new ElementPropertiesPanel(sidebar, this.preview),
+      new CanvasEventLogPanel(sidebar, this.preview),
+      new PlaybackControls(main, this.preview),
     );
   }
 
@@ -83,12 +83,12 @@ export class CompositionCanvasDemo implements Disposable {
       child.destroy();
     }
     this.children.length = 0;
-    this.canvas.destroy();
+    this.preview.destroy();
     this.root.remove();
   }
 }
 
-export function mountCompositionCanvasDemo(container: HTMLElement): () => void {
-  const demo = new CompositionCanvasDemo(container);
+export function mountCompositionPreviewDemo(container: HTMLElement): () => void {
+  const demo = new CompositionPreviewDemo(container);
   return () => demo.destroy();
 }

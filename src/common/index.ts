@@ -1,5 +1,5 @@
-export { CompositionCanvas, mountCompositionCanvas } from './CompositionCanvas';
-export type { CompositionCanvasOptions } from './CompositionCanvas';
+export { CompositionPreview, mountCompositionPreview } from './CompositionPreview';
+export type { CompositionPreviewOptions } from './CompositionPreview';
 export { CanvasStore, initialCanvasState } from './canvasStore';
 export { createCanvasElement } from './elementFactory';
 export {
@@ -26,9 +26,9 @@ export {
   updateCanvasElementNode,
 } from './CanvasElement';
 export type {
-  CompositionCanvasAPI,
+  CompositionPreviewAPI,
   RenderOptions,
-} from './compositionCanvasApi';
+} from './compositionPreviewApi';
 export type { CanvasEventHandler, CanvasEventMap, CanvasEventType } from '../event/events';
 export { CanvasEventEmitter } from '../event/events';
 export type { Disposable } from './Disposable';

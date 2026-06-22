@@ -1,4 +1,4 @@
-import type { CompositionCanvasAPI } from '../src/common/compositionCanvasApi';
+import type { CompositionPreviewAPI } from '../src/common/compositionPreviewApi';
 import { UIComponent } from './core/UIComponent';
 
 function formatTime(seconds: number): string {
@@ -15,7 +15,7 @@ export class PlaybackControls extends UIComponent {
   private rafId: number | null = null;
   private lastFrameTimestamp: number | null = null;
 
-  constructor(container: HTMLElement, api: CompositionCanvasAPI) {
+  constructor(container: HTMLElement, api: CompositionPreviewAPI) {
     super(container, api);
     this.bind();
   }

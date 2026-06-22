@@ -1,4 +1,4 @@
-import type { RenderOptions } from './compositionCanvasApi';
+import type { RenderOptions } from './compositionPreviewApi';
 import {
   applyElementStyles,
   BASE_ELEMENT_CLASS,

@@ -1,4 +1,4 @@
-import type { CompositionCanvasAPI } from '../src/common/compositionCanvasApi';
+import type { CompositionPreviewAPI } from '../src/common/compositionPreviewApi';
 import type { AspectRatioId } from '../src/common/types';
 import { ASPECT_RATIO_PRESETS } from '../src/viewport/player';
 import { UIComponent } from './core/UIComponent';
@@ -11,7 +11,7 @@ const presetActiveClass =
   'border-vc-accent bg-[#1a2740] shadow-[inset_0_0_0_1px_rgba(62,138,245,0.35)]';
 
 export class PlayerSettingsPanel extends UIComponent {
-  constructor(container: HTMLElement, api: CompositionCanvasAPI) {
+  constructor(container: HTMLElement, api: CompositionPreviewAPI) {
     super(container, api);
     this.bind();
   }

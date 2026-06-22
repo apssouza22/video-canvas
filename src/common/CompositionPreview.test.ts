@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll } from 'vitest';
 import { createCanvasElement } from './elementFactory';
-import { CompositionCanvas } from './CompositionCanvas';
+import { CompositionPreview } from './CompositionPreview';
 
 beforeAll(() => {
   class ResizeObserverMock {
@@ -12,10 +12,10 @@ beforeAll(() => {
   globalThis.ResizeObserver = ResizeObserverMock as typeof ResizeObserver;
 });
 
-describe('CompositionCanvas', () => {
+describe('CompositionPreview', () => {
   it('supports adding multiple element types', () => {
     const container = document.createElement('div');
-    const canvas = new CompositionCanvas(container);
+    const canvas = new CompositionPreview(container);
     const playerSize = canvas.getPlayerSize();
 
     canvas.addElement({

@@ -1,13 +1,13 @@
-import type { CompositionCanvasAPI } from '../../src/common/compositionCanvasApi';
+import type { CompositionPreviewAPI } from '../../src/common/compositionPreviewApi';
 import type { Disposable } from '../../src/common/Disposable';
 
 export abstract class UIComponent implements Disposable {
   readonly element: HTMLElement;
   private readonly disposers: Array<() => void> = [];
   protected readonly container: HTMLElement;
-  protected readonly api: CompositionCanvasAPI;
+  protected readonly api: CompositionPreviewAPI;
 
-  constructor(container: HTMLElement, api: CompositionCanvasAPI) {
+  constructor(container: HTMLElement, api: CompositionPreviewAPI) {
     this.container = container;
     this.api = api;
     this.element = this.createElement();

@@ -1,4 +1,4 @@
-import type { CompositionCanvasAPI } from '../src/common/compositionCanvasApi';
+import type { CompositionPreviewAPI } from '../src/common/compositionPreviewApi';
 import type { CanvasElement } from '../src/common/types';
 import { UIComponent } from './core/UIComponent';
 
@@ -10,7 +10,7 @@ const inputClass =
 const checkboxClass = 'flex-row items-center';
 
 export class ElementPropertiesPanel extends UIComponent {
-  constructor(container: HTMLElement, api: CompositionCanvasAPI) {
+  constructor(container: HTMLElement, api: CompositionPreviewAPI) {
     super(container, api);
     this.bind();
   }

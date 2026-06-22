@@ -1,4 +1,4 @@
-import type { CompositionCanvasAPI } from '../src/common/compositionCanvasApi';
+import type { CompositionPreviewAPI } from '../src/common/compositionPreviewApi';
 import { createCanvasElement } from '../src/common/elementFactory';
 import { SAMPLE_VIDEO_SRC } from '../src/video/constants';
 import type { CanvasElementType } from '../src/common/types';
@@ -20,7 +20,7 @@ function createButton(label: string): HTMLButtonElement {
 }
 
 export class CanvasToolbar extends UIComponent {
-  constructor(container: HTMLElement, api: CompositionCanvasAPI) {
+  constructor(container: HTMLElement, api: CompositionPreviewAPI) {
     super(container, api);
     this.bind();
   }

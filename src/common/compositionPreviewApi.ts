@@ -14,7 +14,7 @@ export interface RenderOptions {
   playbackRate?: number;
 }
 
-export interface CompositionCanvasAPI {
+export interface CompositionPreviewAPI {
   addElement(element: CanvasElement): string;
   removeElement(id: string): boolean;
   updateElement(id: string, patch: Partial<CanvasElement>): void;

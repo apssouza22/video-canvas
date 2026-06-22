@@ -1,7 +1,7 @@
 {
-  "name": "@opensource/video-canvas",
+  "name": "@opensource/video-preview",
   "version": "0.1.0",
-  "description": "Framework-agnostic composition canvas for video editing",
+  "description": "Framework-agnostic composition preview for video editing",
   "type": "module",
   "main": "./src/index.ts",
   "module": "./src/index.ts",

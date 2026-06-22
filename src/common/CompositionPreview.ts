@@ -1,5 +1,5 @@
 import { CanvasStore } from './canvasStore';
-import type { CompositionCanvasAPI, RenderOptions } from './compositionCanvasApi';
+import type { CompositionPreviewAPI, RenderOptions } from './compositionPreviewApi';
 import type { CanvasEventHandler, CanvasEventType } from '../event/events';
 import type { Disposable } from './Disposable';
 import type { AspectRatioId, CanvasElement, CanvasSize, CanvasState } from './types';
@@ -7,18 +7,18 @@ import { CanvasViewport } from '../viewport/CanvasViewport';
 
 const ROOT_CLASSES = ['min-w-0', 'min-h-0', 'overflow-hidden', '[contain:layout_size]'];
 
-export interface CompositionCanvasOptions {
+export interface CompositionPreviewOptions {
   initialState?: Partial<CanvasState>;
   className?: string;
 }
 
-export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
+export class CompositionPreview implements CompositionPreviewAPI, Disposable {
   readonly element: HTMLElement;
   private readonly store: CanvasStore;
   private viewport: CanvasViewport | null = null;
   private currentTime = 0;
 
-  constructor(container: HTMLElement, options: CompositionCanvasOptions = {}) {
+  constructor(container: HTMLElement, options: CompositionPreviewOptions = {}) {
     this.element = container;
     for (const className of ROOT_CLASSES) {
       this.element.classList.add(className);
@@ -135,9 +135,9 @@ export class CompositionCanvas implements CompositionCanvasAPI, Disposable {
   }
 }
 
-export function mountCompositionCanvas(
+export function mountCompositionPreview(
   container: HTMLElement,
-  options: CompositionCanvasOptions = {},
-): CompositionCanvas {
-  return new CompositionCanvas(container, options);
+  options: CompositionPreviewOptions = {},
+): CompositionPreview {
+  return new CompositionPreview(container, options);
 }

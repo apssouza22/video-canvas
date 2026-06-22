@@ -17,7 +17,7 @@ export class CanvasEventLogPanel extends UIComponent {
     const header = document.createElement('div');
     header.innerHTML = `
       <h2 class="m-0 text-base">Event log</h2>
-      <p class="mt-1.5 mb-0 text-vc-muted text-[0.8rem] leading-snug">Live stream from <code class="text-vc-accent">CompositionCanvas</code> events.</p>
+      <p class="mt-1.5 mb-0 text-vc-muted text-[0.8rem] leading-snug">Live stream from <code class="text-vc-accent">CompositionPreview</code> events.</p>
     `;
 
     const list = this.tagRef(document.createElement('ul'), 'list');

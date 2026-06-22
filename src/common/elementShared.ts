@@ -1,5 +1,5 @@
 import { elementTransformStyle } from '../transform/transform';
-import type { RenderOptions } from './compositionCanvasApi';
+import type { RenderOptions } from './compositionPreviewApi';
 import { DEFAULT_PLAYER_SIZE } from './constants';
 import { createElementId } from './id';
 import { DEFAULT_ELEMENT_DURATION, getVideoMediaTime } from './timing';
@@ -124,14 +124,15 @@ export function syncMediaPlayback(
 
   const isPlaying = options.playing ?? false;
   const mediaTime = getVideoMediaTime(element, compositionTime, options);
+  const drift = Math.abs(media.currentTime - mediaTime);
 
-  // While playing, video drift is corrected via RVFC; audio runs from play() + initial seek.
-  const shouldSeek = !isPlaying;
-  if (shouldSeek && Math.abs(media.currentTime - mediaTime) > 0.15) {
-    try {
-      media.currentTime = mediaTime;
-    } catch {
-      // Ignore seek errors while metadata is loading.
+  if (!isPlaying) {
+    if (drift > 0.15) {
+      try {
+        media.currentTime = mediaTime;
+      } catch {
+        // Ignore seek errors while metadata is loading.
+      }
     }
   }
 
@@ -139,7 +140,7 @@ export function syncMediaPlayback(
     const starting = node.dataset.mediaPlaying !== 'true';
     if (starting) {
       node.dataset.mediaPlaying = 'true';
-      if (Math.abs(media.currentTime - mediaTime) > 0.05) {
+      if (drift > 0.05) {
         try {
           media.currentTime = mediaTime;
         } catch {
@@ -149,6 +150,13 @@ export function syncMediaPlayback(
       void media.play().catch(() => {
         // Autoplay may be blocked until the user interacts with the page.
       });
+    } else if (drift > 0.15) {
+      // External seek during playback (e.g. transcription jump) — re-sync audio/video.
+      try {
+        media.currentTime = mediaTime;
+      } catch {
+        // Ignore seek errors while metadata is loading.
+      }
     }
     return;
   }

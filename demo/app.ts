@@ -1,5 +1,5 @@
-import { mountCompositionCanvasDemo } from './compositionCanvasDemo';
+import { mountCompositionPreviewDemo } from './compositionPreviewDemo';
 
 export function mountApp(container: HTMLElement): () => void {
-  return mountCompositionCanvasDemo(container);
+  return mountCompositionPreviewDemo(container);
 }
